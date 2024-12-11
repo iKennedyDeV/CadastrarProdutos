@@ -1,0 +1,193 @@
+
+
+/* Container principal */
+.container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 81%;
+    max-width: 800px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Título */
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+/* Formulário */
+form {
+    margin-bottom: 20px;
+}
+.cuidado{
+
+color: white;
+background-color: #f53;
+border-radius: 5px;
+ }
+ 
+form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+    color: #333;
+}
+
+form input {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+form input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+}
+
+form button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+form button:hover {
+    background-color: #0056b3;
+}
+
+form button#removeLast {
+    background-color: #ffc107;
+    margin-top: 10px;
+}
+
+form button#removeLast:hover {
+    background-color: #e0a800;
+}
+
+/* Tabela */
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+table th, table td {
+    text-align: left;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+}
+
+table th {
+    background-color: #007bff;
+    color: white;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Botões extras */
+button#generateFile {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 15px;
+    display: block;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+button#generateFile:hover {
+    background-color: #218838;
+}
+
+/* Estilo responsivo */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+ 
+    }
+
+    form input,
+    form button,
+    button#generateFile {
+        font-size: 14px;
+    }
+}
+#limpar{
+ background-color:red ;
+ color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 15px;
+    display: block;
+    width: 100%;
+    transition:background-color 0.3s;
+}
+/* Estilo do modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding-top: 60px;
+}
+
+/* Conteúdo do modal */
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Botões de confirmação */
+button {
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #ddd;
+}
+
+/* Estilos para os botões de confirmação */
+#confirmClearTable {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+}
+
+#cancelClearTable {
+    background-color: #f44336;
+    color: white;
+    border: none;
+}
