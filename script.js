@@ -1,148 +1,133 @@
-
-const produtos = [{
-    "CÓDIGO": 98485,
-    "DESCRIÇÃO": "* 1 INTER.BIPOLAR SIM.C/PLACA 20A 4X2*BLAN 590 FAM",
-    "Código de Barras": 7896039705909,
-    "DESCRIÇÃOSITUAÇÃO": "FORA DE LINHA",
-    "MARCA": "FAME",
-}, {
-    "CÓDIGO": 673307,
-    "DESCRIÇÃO": "* 1 INTERR.BIPOLAR PARALELO 10A/250V WALMA",
-    "Código de Barras": 7897916723214,
-    "DESCRIÇÃOSITUAÇÃO": "FORA DE LINHA",
-    "MARCA": "WALMA",
-}]; 
-
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('productForm');
-    const tableBody = document.querySelector('#productTable tbody');
-    const generateFileButton = document.getElementById('generateFile');
-    const clearTableButton = document.getElementById('clearTable');
-    const removeLastButton = document.getElementById('removeLast');
-    const confirmationModal = document.getElementById('confirmationModal');
-    const confirmClearButton = document.getElementById('confirmClearTable');
-    const cancelClearButton = document.getElementById('cancelClearTable'); 
+    const form = document.getElementById('productForm');
+    const tableBody = document.querySelector('#productTable tbody');
+    const generateFileButton = document.getElementById('generateFile');
+    const clearTableButton = document.getElementById('clearTable');
+    const removeLastButton = document.getElementById('removeLast');
+    const confirmationModal = document.getElementById('confirmationModal');
+    const confirmClearButton = document.getElementById('confirmClearTable');
+    const cancelClearButton = document.getElementById('cancelClearTable');
 
-    // Recupera produtos do localStorage
-    let products = JSON.parse(localStorage.getItem('products')) || []; 
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+    let produtosJSON = [];
 
-    // Atualiza a tabela com os dados armazenados
-    function updateTable() {
-        tableBody.innerHTML = ''; // Limpa as linhas existentes
-        products.forEach((product, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${product.barcode}</td>
-                <td>${product.quantity}</td>
-            `;
-            row.dataset.index = index; // Adiciona o índice para identificação
-            tableBody.appendChild(row);
-        });
-    } 
+    // Função para carregar o arquivo JSON
+    async function loadProdutos() {
+        try {
+            const response = await fetch('produtos.json');
+            if (!response.ok) {
+                throw new Error('Erro ao carregar o arquivo JSON');
+            }
+            produtosJSON = await response.json();
+        } catch (error) {
+            console.error('Erro ao carregar os dados do JSON:', error);
+        }
+    }
 
-    // Atualiza a tabela na inicialização
-    updateTable(); 
+    // Chama a função de carregamento do JSON
+    loadProdutos();
 
-    // Adiciona ou atualiza um produto na lista
-    form.addEventListener('submit', function (event) {
-        event.preventDefault(); 
+    // Atualiza a tabela com os dados armazenados
+    function updateTable() {
+        tableBody.innerHTML = '';
+        products.forEach((product, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${product.barcode}</td>
+                <td>${product.quantity}</td>
+            `;
+            row.dataset.index = index;
+            tableBody.appendChild(row);
+        });
+    }
 
-        const barcode = String(document.getElementById('barcode').value).trim();
-        const quantity = parseInt(document.getElementById('quantity').value, 10); 
+    // Atualiza a tabela na inicialização
+    updateTable();
 
-        if (!barcode || isNaN(quantity) || quantity <= 0) {
-            alert('Por favor, insira um código de barras válido e uma quantidade positiva.');
-            return;
-        } 
+    // Adiciona ou atualiza um produto na lista
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
 
-        // Verifica se o produto já existe pelo código de barras
-        const existingProduct = products.find(product => product.barcode === barcode);
-        if (existingProduct) {
-            // Atualiza a quantidade do produto existente
-            existingProduct.quantity += quantity;
-        } else {
-            // Adiciona um novo produto
-            products.push({
-                barcode,
-                quantity
-            });
-        } 
+        const barcode = String(document.getElementById('barcode').value).trim();
+        const quantity = parseInt(document.getElementById('quantity').value, 10);
 
-        // Atualiza o localStorage e a tabela
-        localStorage.setItem('products', JSON.stringify(products));
-        updateTable(); 
+        if (!barcode || isNaN(quantity) || quantity <= 0) {
+            alert('Por favor, insira um código de barras válido e uma quantidade positiva.');
+            return;
+        }
 
-        // Limpa o formulário
-        form.reset();
-    }); 
+        const existingProduct = products.find(product => product.barcode === barcode);
+        if (existingProduct) {
+            existingProduct.quantity += quantity;
+        } else {
+            products.push({ barcode, quantity });
+        }
 
-    // Gera o arquivo CSV com os dados da tabela e dados do JSON
-    generateFileButton.addEventListener('click', function () {
-        try {
-            let fileContent = 'Código Copafer,Detalhe,Código de Barras,Quantidade,Fora de Linha\n';
-            products.forEach(product => {
-                // Encontrar os valores correspondentes no objeto 'produtos'
-                const matchingProduct = produtos.find(item => item["Código de Barras"] === product.barcode);
-                if (matchingProduct) {
-                    fileContent += `${matchingProduct["CÓDIGO"]},${matchingProduct["DESCRIÇÃO"]},${product.barcode},${product.quantity},${matchingProduct["DESCRIÇÃOSITUAÇÃO"]}\n`;
-                } else {
-                    fileContent += ` - , - ,${product.barcode},${product.quantity},-\n`;
-                }
-            }); 
+        localStorage.setItem('products', JSON.stringify(products));
+        updateTable();
+        form.reset();
+    });
 
-            const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'produtos.csv';
-            link.click();
-        } catch (error) {
-            console.error('Erro ao gerar o arquivo CSV:', error);
-            alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
-        }
-    }); 
+    // Gera o arquivo CSV com os dados da tabela e do JSON
+    generateFileButton.addEventListener('click', function () {
+        try {
+            let fileContent = 'Código Copafer,Detalhe,Código de Barras,Quantidade,Fora de Linha\n';
+            products.forEach(product => {
+                const matchingProduct = produtosJSON.find(item => item["Código de Barras"] === product.barcode);
+                if (matchingProduct) {
+                    fileContent += `${matchingProduct["CÓDIGO"]},${matchingProduct["DESCRIÇÃO"]},${product.barcode},${product.quantity},${matchingProduct["DESCRIÇÃOSITUAÇÃO"]}\n`;
+                } else {
+                    fileContent += ` - ,Produto não cadastrado,${product.barcode},${product.quantity}, - \n`;
+                }
+            });
 
-    // Limpa a tabela e o localStorage
-    clearTableButton.addEventListener('click', function () {
-        confirmationModal.style.display = 'block';
-    }); 
+            const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'produtos.csv';
+            link.click();
+        } catch (error) {
+            console.error('Erro ao gerar o arquivo CSV:', error);
+            alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
+        }
+    });
 
-    // Fecha o modal sem fazer nada
-    cancelClearButton.addEventListener('click', function () {
-        confirmationModal.style.display = 'none';
-    }); 
+    // Limpa a tabela e o localStorage
+    clearTableButton.addEventListener('click', function () {
+        confirmationModal.style.display = 'block';
+    });
 
-    // Limpa a tabela e fecha o modal
-    confirmClearButton.addEventListener('click', function () {
-        products = [];
-        localStorage.removeItem('products');
-        updateTable();
-        confirmationModal.style.display = 'none';
-    }); 
+    cancelClearButton.addEventListener('click', function () {
+        confirmationModal.style.display = 'none';
+    });
 
-    // Remove o último produto da tabela
-    removeLastButton.addEventListener('click', function () {
-        if (products.length > 0) {
-            products.pop();
-            localStorage.setItem('products', JSON.stringify(products));
-            updateTable();
-        }
-    }); 
+    confirmClearButton.addEventListener('click', function () {
+        products = [];
+        localStorage.removeItem('products');
+        updateTable();
+        confirmationModal.style.display = 'none';
+    });
 
-    // Permite editar uma linha da tabela ao clicar nela
-    tableBody.addEventListener('click', function (event) {
-        const row = event.target.closest('tr');
-        if (row) {
-            const index = row.dataset.index; // Obtém o índice da linha clicada
-            const product = products[index]; 
+    removeLastButton.addEventListener('click', function () {
+        if (products.length > 0) {
+            products.pop();
+            localStorage.setItem('products', JSON.stringify(products));
+            updateTable();
+        }
+    });
 
-            // Preenche o formulário com os dados da linha selecionada
-            document.getElementById('barcode').value = product.barcode;
-            document.getElementById('quantity').value = product.quantity; 
+    tableBody.addEventListener('click', function (event) {
+        const row = event.target.closest('tr');
+        if (row) {
+            const index = row.dataset.index;
+            const product = products[index];
 
-            // Remove o produto temporariamente para permitir edição
-            products.splice(index, 1);
-            localStorage.setItem('products', JSON.stringify(products));
-            updateTable();
-        }
-    });
+            document.getElementById('barcode').value = product.barcode;
+            document.getElementById('quantity').value = product.quantity;
+
+            products.splice(index, 1);
+            localStorage.setItem('products', JSON.stringify(products));
+            updateTable();
+        }
+    });
 });
