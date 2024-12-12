@@ -11,14 +11,18 @@ document.addEventListener('DOMContentLoaded', function () {
     let products = JSON.parse(localStorage.getItem('products')) || [];
     let produtosJSON = [];
 
-    // Função para carregar o arquivo JSON
+    // Função para carregar o arquivo JSON e normalizar os dados
     async function loadProdutos() {
         try {
             const response = await fetch('produtos.json');
             if (!response.ok) {
                 throw new Error('Erro ao carregar o arquivo JSON');
             }
-            produtosJSON = await response.json();
+            const jsonData = await response.json();
+            produtosJSON = jsonData.map(item => ({
+                ...item,
+                "Código de Barras": String(item["Código de Barras"]).trim()
+            }));
         } catch (error) {
             console.error('Erro ao carregar os dados do JSON:', error);
         }
@@ -51,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const barcode = String(document.getElementById('barcode').value).trim();
         const quantity = parseInt(document.getElementById('quantity').value, 10);
 
-        if (!barcode || isNaN(quantity) || quantity <= 0) {
+        if (!barcode || isNaN(quantity) || quantity <= -1) {
             alert('Por favor, insira um código de barras válido e uma quantidade positiva.');
             return;
         }
@@ -71,13 +75,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Gera o arquivo CSV com os dados da tabela e do JSON
     generateFileButton.addEventListener('click', function () {
         try {
-            let fileContent = 'Codigo,Descricao,Codigo de Barras,Quantidade,Fora de Linha\n';
+            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Fora de Linha\n';
             products.forEach(product => {
-                const matchingProduct = produtosJSON.find(item => item["Código de Barras"] === product.barcode);
+                const matchingProduct = produtosJSON.find(item => 
+                    String(item["Código de Barras"]).trim() === product.barcode.trim()
+                );
                 if (matchingProduct) {
-                    fileContent += `${matchingProduct["CÓDIGO"]},${matchingProduct["DESCRIÇÃO"]},${product.barcode},${product.quantity},${matchingProduct["DESCRIÇÃOSITUAÇÃO"]}\n`;
+                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${product.barcode};${product.quantity};${matchingProduct["DESCRIÇÃOSITUAÇÃO"]}\n`;
                 } else {
-                    fileContent += ` - , - ,${product.barcode},${product.quantity}, - \n`;
+                    fileContent += `-;-;${product.barcode};${product.quantity};-\n`;
                 }
             });
 
@@ -108,6 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmationModal.style.display = 'none';
     });
 
+    // Remove o último produto da lista
     removeLastButton.addEventListener('click', function () {
         if (products.length > 0) {
             products.pop();
@@ -116,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Permite editar um produto ao clicar na tabela
     tableBody.addEventListener('click', function (event) {
         const row = event.target.closest('tr');
         if (row) {
