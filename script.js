@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (matchingProduct) {
                     fileContent += `${matchingProduct["CÓDIGO"]},${matchingProduct["DESCRIÇÃO"]},${product.barcode},${product.quantity},${matchingProduct["DESCRIÇÃOSITUAÇÃO"]}\n`;
                 } else {
-                    fileContent += ` - ,Produto não cadastrado,${product.barcode},${product.quantity}, - \n`;
+                    fileContent += ` - , - ,${product.barcode},${product.quantity}, - \n`;
                 }
             });
 
