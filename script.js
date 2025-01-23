@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Gera o arquivo CSV com os dados da tabela e do JSON
     generateFileButton.addEventListener('click', function () {
         try {
-            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Fora de Linha\n';
+            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Qt Sistema\n';
             products.forEach(product => {
                 const matchingProduct = produtosJSON.find(item => 
                     String(item["Código de Barras"]).trim() === product.barcode.trim()
