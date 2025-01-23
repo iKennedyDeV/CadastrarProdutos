@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const jsonData = await response.json();
             produtosJSON = jsonData.map(item => ({
                 ...item,
-                "Código de Barras": String(item["Código de Barras"]).trim()
+                "Código de Barras": String(item["Código de Barras"]).trim(),
+                "CÓDIGO": String(item["CÓDIGO"]).trim()
             }));
         } catch (error) {
             console.error('Erro ao carregar os dados do JSON:', error);
@@ -37,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
         products.forEach((product, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${product.barcode}</td>
+                <td>${product.identifier}</td>
                 <td>${product.quantity}</td>
             `;
             row.dataset.index = index;
@@ -52,19 +53,19 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', function (event) {
         event.preventDefault();
 
-        const barcode = String(document.getElementById('barcode').value).trim();
+        const identifier = String(document.getElementById('identifier').value).trim();
         const quantity = parseInt(document.getElementById('quantity').value, 10);
 
-        if (!barcode || isNaN(quantity) || quantity <= -1) {
-            alert('Por favor, insira um código de barras válido e uma quantidade positiva.');
+        if (!identifier || isNaN(quantity) || quantity <= 0) {
+            alert('Por favor, insira um código válido e uma quantidade positiva.');
             return;
         }
 
-        const existingProduct = products.find(product => product.barcode === barcode);
+        const existingProduct = products.find(product => product.identifier === identifier);
         if (existingProduct) {
             existingProduct.quantity += quantity;
         } else {
-            products.push({ barcode, quantity });
+            products.push({ identifier, quantity });
         }
 
         localStorage.setItem('products', JSON.stringify(products));
@@ -78,12 +79,13 @@ document.addEventListener('DOMContentLoaded', function () {
             let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Qt Sistema\n';
             products.forEach(product => {
                 const matchingProduct = produtosJSON.find(item => 
-                    String(item["Código de Barras"]).trim() === product.barcode.trim()
+                    item["Código de Barras"] === product.identifier || item["CÓDIGO"] === product.identifier
                 );
+
                 if (matchingProduct) {
-                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${product.barcode};${product.quantity};${matchingProduct["DESCRIÇÃOSITUAÇÃO"]}\n`;
+                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["DESCRIÇÃOSITUAÇÃO"]}\n`;
                 } else {
-                    fileContent += `-;-;${product.barcode};${product.quantity};-\n`;
+                    fileContent += `-;-;${product.identifier};${product.quantity};-\n`;
                 }
             });
 
@@ -97,6 +99,10 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
         }
     });
+
+    
+
+
 
     // Limpa a tabela e o localStorage
     clearTableButton.addEventListener('click', function () {
