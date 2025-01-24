@@ -56,11 +56,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const identifier = String(document.getElementById('identifier').value).trim();
         const quantity = parseInt(document.getElementById('quantity').value, 10);
 
-        if (!identifier || isNaN(quantity) || quantity <= 0) {
-            alert('Por favor, insira um código válido e uma quantidade positiva.');
-            return;
-        }
-
         const existingProduct = products.find(product => product.identifier === identifier);
         if (existingProduct) {
             existingProduct.quantity += quantity;
