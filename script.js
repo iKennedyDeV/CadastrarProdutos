@@ -125,12 +125,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Permite editar um produto ao clicar na tabela
-    tableBody.addEventListener('click', function (event) {
-        const row = event.target.closest('tr');
-        if (row) {
-            const index = row.dataset.index;
-            const product = products[index];
+tableBody.addEventListener('click', function (event) {
+    const row = event.target.closest('tr');
+    if (row) {
+        const index = row.dataset.index;
+        const product = products[index];
 
+        const confirmEdit = window.confirm(`Deseja editar o produto "${product.identifier}" com quantidade ${product.quantity}?`);
+        if (confirmEdit) {
             document.getElementById('identifier').value = product.identifier;
             document.getElementById('quantity').value = product.quantity;
 
@@ -138,5 +140,5 @@ document.addEventListener('DOMContentLoaded', function () {
             localStorage.setItem('products', JSON.stringify(products));
             updateTable();
         }
-    });
+    }
 });
