@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const index = row.dataset.index;
             const product = products[index];
 
-            document.getElementById('barcode').value = product.barcode;
+            document.getElementById('identifier').value = product.identifier;
             document.getElementById('quantity').value = product.quantity;
 
             products.splice(index, 1);
