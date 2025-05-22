@@ -66,6 +66,8 @@ form.addEventListener('submit', function (event) {
     localStorage.setItem('products', JSON.stringify(products));  
     updateTable();  
     form.reset();  
+    document.getElementById('identifier').focus();
+
 });  
 
 // Gera o arquivo CSV com os dados da tabela e do JSON  
