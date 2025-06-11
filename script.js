@@ -16,13 +16,12 @@ document.addEventListener('DOMContentLoaded', function () {
         return String(code).trim().replace(/^0+/, '').toUpperCase();
     }
 
-    // Função para carregar o arquivo JSON e normalizar os dados
+    // Carrega e normaliza o JSON
     async function loadProdutos() {
         try {
             const response = await fetch('produtos.json');
-            if (!response.ok) {
-                throw new Error('Erro ao carregar o arquivo JSON');
-            }
+            if (!response.ok) throw new Error('Erro ao carregar o arquivo JSON');
+
             const jsonData = await response.json();
             produtosJSON = jsonData.map(item => ({
                 ...item,
@@ -34,10 +33,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Chama a função de carregamento do JSON
     loadProdutos();
 
-    // Atualiza a tabela com os dados armazenados
     function updateTable() {
         tableBody.innerHTML = '';
         products.forEach((product, index) => {
@@ -51,10 +48,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Atualiza a tabela na inicialização
     updateTable();
 
-    // Adiciona ou atualiza um produto na lista
     form.addEventListener('submit', function (event) {
         event.preventDefault();
 
@@ -74,12 +69,10 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('identifier').focus();
     });
 
-    // Gera o arquivo CSV com os dados da tabela e do JSON
     generateFileButton.addEventListener('click', function () {
         try {
-            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Qt Sistema\n';
+            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca\n';
 
-            // Validação antecipada (opcional)
             const invalids = products.filter(product => {
                 const userCode = normalizeCode(product.identifier);
                 return !produtosJSON.find(item =>
@@ -93,13 +86,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             products.forEach(product => {
                 const userCode = normalizeCode(product.identifier);
-
                 const matchingProduct = produtosJSON.find(item =>
                     item.barrasNormalizado === userCode || item.codigoNormalizado === userCode
                 );
 
                 if (matchingProduct) {
-                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["DESCRIÇÃOSITUAÇÃO"]}\n`;
+                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]}\n`;
                 } else {
                     fileContent += `-;-;${product.identifier};${product.quantity};(Não encontrado)\n`;
                 }
@@ -116,7 +108,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Limpa a tabela e o localStorage
     clearTableButton.addEventListener('click', function () {
         confirmationModal.style.display = 'block';
     });
@@ -132,7 +123,6 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmationModal.style.display = 'none';
     });
 
-    // Remove o último produto da lista
     removeLastButton.addEventListener('click', function () {
         if (products.length > 0) {
             products.pop();
@@ -141,7 +131,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Permite editar um produto ao clicar na tabela
     tableBody.addEventListener('click', function (event) {
         const row = event.target.closest('tr');
         if (row) {
