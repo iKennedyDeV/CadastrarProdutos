@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Gera o arquivo CSV com os dados da tabela e do JSON
     generateFileButton.addEventListener('click', function () {
         try {
-            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Qt Sistema\n';
+            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca\n';
 
             // Validação antecipada (opcional)
             const invalids = products.filter(product => {
