@@ -99,10 +99,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
 
                 if (matchingProduct) {
-                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["DESCRIÇÃOSITUAÇÃO"]}\n`;
-                } else {
-                    fileContent += `-;-;${product.identifier};${product.quantity};(Não encontrado)\n`;
+                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]}\n`;
                 }
+                   
             });
 
             const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
