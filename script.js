@@ -92,17 +92,19 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             products.forEach(product => {
-                const userCode = normalizeCode(product.identifier);
+    const userCode = normalizeCode(product.identifier);
 
-                const matchingProduct = produtosJSON.find(item =>
-                    item.barrasNormalizado === userCode || item.codigoNormalizado === userCode
-                );
+    const matchingProduct = produtosJSON.find(item =>
+        item.barrasNormalizado === userCode || item.codigoNormalizado === userCode
+    );
 
-                if (matchingProduct) {
-                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]}\n`;
-                }
-                   
-            });
+    const codigo = matchingProduct ? matchingProduct["CÓDIGO"] : 'NÃO ENCONTRADO';
+    const descricao = matchingProduct ? matchingProduct["DESCRIÇÃO"] : 'NÃO ENCONTRADO';
+    const barras = matchingProduct ? matchingProduct["Código de Barras"] : 'NÃO ENCONTRADO';
+    const marca = matchingProduct ? matchingProduct["MARCA"] : 'NÃO ENCONTRADO';
+
+    fileContent += `${codigo};${descricao};${barras};${product.quantity};${marca}\n`;
+});
 
             const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
