@@ -98,8 +98,9 @@ document.addEventListener('DOMContentLoaded', function () {
         item.barrasNormalizado === userCode || item.codigoNormalizado === userCode
     );
 
-    const codigo = matchingProduct ? matchingProduct["CÓDIGO"] : '-';
+    const codigo = matchingProduct ? matchingProduct["CÓDIGO"] : product.identifier;
     const descricao = matchingProduct ? matchingProduct["DESCRIÇÃO"] : '-';
+    const barras = matchingProduct ? matchingProduct["Código de Barras"] : product.identifier;
     const marca = matchingProduct ? matchingProduct["MARCA"] : '-';
 
     fileContent += `${codigo};${descricao};${barras};${product.quantity};${marca}\n`;
