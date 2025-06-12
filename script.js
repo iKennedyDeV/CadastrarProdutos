@@ -98,10 +98,10 @@ document.addEventListener('DOMContentLoaded', function () {
         item.barrasNormalizado === userCode || item.codigoNormalizado === userCode
     );
 
-    const codigo = matchingProduct ? matchingProduct["CÓDIGO"] : 'NÃO ENCONTRADO';
-    const descricao = matchingProduct ? matchingProduct["DESCRIÇÃO"] : 'NÃO ENCONTRADO';
-    const barras = matchingProduct ? matchingProduct["Código de Barras"] : 'NÃO ENCONTRADO';
-    const marca = matchingProduct ? matchingProduct["MARCA"] : 'NÃO ENCONTRADO';
+    const codigo = matchingProduct ? matchingProduct["CÓDIGO"] : '-';
+    const descricao = matchingProduct ? matchingProduct["DESCRIÇÃO"] : '-';
+    const barras = matchingProduct ? matchingProduct["Código de Barras"] : '-';
+    const marca = matchingProduct ? matchingProduct["MARCA"] : '-';
 
     fileContent += `${codigo};${descricao};${barras};${product.quantity};${marca}\n`;
 });
