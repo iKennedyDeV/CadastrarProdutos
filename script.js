@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let products = JSON.parse(localStorage.getItem('products')) || [];
     let produtosJSON = [];
 
-    // Carrega o JSON e normaliza os campos
+    // Função para carregar o arquivo JSON e normalizar os dados
     async function loadProdutos() {
         try {
             const response = await fetch('produtos.json');
@@ -29,25 +29,24 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Chama a função de carregamento do JSON
     loadProdutos();
 
-    // Atualiza a tabela de produtos
+    // Atualiza a tabela com os dados armazenados
     function updateTable() {
         tableBody.innerHTML = '';
         products.forEach((product, index) => {
             const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${product.identifier}</td>
-                <td>${product.quantity}</td>
-            `;
+            row.innerHTML = `<td>${product.identifier}</td><td>${product.quantity}</td>`;
             row.dataset.index = index;
             tableBody.appendChild(row);
         });
     }
 
+    // Atualiza a tabela na inicialização
     updateTable();
 
-    // Adiciona ou atualiza um item
+    // Adiciona ou atualiza um produto na lista
     form.addEventListener('submit', function (event) {
         event.preventDefault();
 
@@ -67,22 +66,32 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('identifier').focus();
     });
 
-    // Geração do arquivo CSV
+    // Gera o arquivo CSV com os dados da tabela e do JSON
     generateFileButton.addEventListener('click', function () {
         try {
             let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca\n';
 
             products.forEach(product => {
+                const identifier = product.identifier;
                 const matchingProduct = produtosJSON.find(item =>
-                    item["Código de Barras"] === product.identifier ||
-                    item["CÓDIGO"] === product.identifier
+                    item["Código de Barras"] === identifier || item["CÓDIGO"] === identifier
                 );
 
                 if (matchingProduct) {
                     fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]}\n`;
                 } else {
-                    // Retorna o código de entrada no lugar de "Código" e "Código de Barras"
-                    fileContent += `${product.identifier};-;${product.identifier};${product.quantity};-\n`;
+                    // Decide onde colocar o código não encontrado
+                    let codigo = '-';
+                    let barras = '-';
+
+                    const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
+                    if (isCodigoBarras) {
+                        barras = identifier;
+                    } else {
+                        codigo = identifier;
+                    }
+
+                    fileContent += `${codigo};-;${barras};${product.quantity};-\n`;
                 }
             });
 
@@ -97,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Limpeza da tabela com confirmação
+    // Limpa a tabela e o localStorage
     clearTableButton.addEventListener('click', function () {
         confirmationModal.style.display = 'block';
     });
@@ -113,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmationModal.style.display = 'none';
     });
 
-    // Remove o último item
+    // Remove o último produto da lista
     removeLastButton.addEventListener('click', function () {
         if (products.length > 0) {
             products.pop();
@@ -122,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Edita ao clicar na linha da tabela
+    // Permite editar um produto ao clicar na tabela
     tableBody.addEventListener('click', function (event) {
         const row = event.target.closest('tr');
         if (row) {
