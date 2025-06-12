@@ -100,7 +100,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const codigo = matchingProduct ? matchingProduct["CÓDIGO"] : '-';
     const descricao = matchingProduct ? matchingProduct["DESCRIÇÃO"] : '-';
-    const barras = matchingProduct ? matchingProduct["Código de Barras"] : '-';
     const marca = matchingProduct ? matchingProduct["MARCA"] : '-';
 
     fileContent += `${codigo};${descricao};${barras};${product.quantity};${marca}\n`;
