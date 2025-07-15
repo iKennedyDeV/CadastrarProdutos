@@ -7,17 +7,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmationModal = document.getElementById('confirmationModal');
     const confirmClearButton = document.getElementById('confirmClearTable');
     const cancelClearButton = document.getElementById('cancelClearTable');
+    const useValidityCheckbox = document.getElementById('useValidity');
+    const validityContainer = document.getElementById('validityContainer');
+    const validityInput = document.getElementById('validity');
 
     let products = JSON.parse(localStorage.getItem('products')) || [];
     let produtosJSON = [];
 
-    // Função para carregar o arquivo JSON e normalizar os dados
+    useValidityCheckbox.addEventListener('change', function () {
+        validityContainer.style.display = this.checked ? 'block' : 'none';
+    });
+
     async function loadProdutos() {
         try {
             const response = await fetch('produtos.json');
-            if (!response.ok) {
-                throw new Error('Erro ao carregar o arquivo JSON');
-            }
+            if (!response.ok) throw new Error('Erro ao carregar o arquivo JSON');
             const jsonData = await response.json();
             produtosJSON = jsonData.map(item => ({
                 ...item,
@@ -29,10 +33,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Chama a função de carregamento do JSON
     loadProdutos();
 
-    // Atualiza a tabela com os dados armazenados
     function updateTable() {
         tableBody.innerHTML = '';
         products.forEach((product, index) => {
@@ -43,33 +45,47 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Atualiza a tabela na inicialização
     updateTable();
 
-    // Adiciona ou atualiza um produto na lista
     form.addEventListener('submit', function (event) {
         event.preventDefault();
 
         const identifier = String(document.getElementById('identifier').value).trim();
         const quantity = parseInt(document.getElementById('quantity').value, 10);
+        let validity = '';
+
+        if (useValidityCheckbox.checked) {
+            validity = validityInput.value.trim();
+            const isValidDate = /^\d{2}\/\d{2}\/\d{4}$/.test(validity);
+            if (!isValidDate) {
+                alert('Por favor, insira a validade no formato dd/mm/yyyy.');
+                validityInput.focus();
+                return;
+            }
+        }
 
         const existingProduct = products.find(product => product.identifier === identifier);
         if (existingProduct) {
             existingProduct.quantity += quantity;
         } else {
-            products.push({ identifier, quantity });
+            products.push({ identifier, quantity, validity });
         }
 
         localStorage.setItem('products', JSON.stringify(products));
         updateTable();
         form.reset();
+        validityContainer.style.display = useValidityCheckbox.checked ? 'block' : 'none';
         document.getElementById('identifier').focus();
     });
 
-    // Gera o arquivo CSV com os dados da tabela e do JSON
     generateFileButton.addEventListener('click', function () {
         try {
-            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca\n';
+            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;';
+            const usarValidade = useValidityCheckbox.checked;
+            if (usarValidade) {
+                fileContent += 'Validade;';
+            }
+            fileContent += 'Marca\n';
 
             products.forEach(product => {
                 const identifier = product.identifier;
@@ -77,21 +93,21 @@ document.addEventListener('DOMContentLoaded', function () {
                     item["Código de Barras"] === identifier || item["CÓDIGO"] === identifier
                 );
 
+                const validade = usarValidade ? (product.validity || '-') : null;
+
                 if (matchingProduct) {
-                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]}\n`;
+                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};`;
+                    if (usarValidade) fileContent += `${validade};`;
+                    fileContent += `${matchingProduct["MARCA"]}\n`;
                 } else {
-                    // Decide onde colocar o código não encontrado
-                    let codigo = '-';
-                    let barras = '-';
-
+                    let codigo = '-', barras = '-';
                     const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
-                    if (isCodigoBarras) {
-                        barras = identifier;
-                    } else {
-                        codigo = identifier;
-                    }
+                    if (isCodigoBarras) barras = identifier;
+                    else codigo = identifier;
 
-                    fileContent += `${codigo};-;${barras};${product.quantity};-\n`;
+                    fileContent += `${codigo};-;${barras};${product.quantity};`;
+                    if (usarValidade) fileContent += `${validade};`;
+                    fileContent += `-\n`;
                 }
             });
 
@@ -106,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Limpa a tabela e o localStorage
     clearTableButton.addEventListener('click', function () {
         confirmationModal.style.display = 'block';
     });
@@ -122,7 +137,6 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmationModal.style.display = 'none';
     });
 
-    // Remove o último produto da lista
     removeLastButton.addEventListener('click', function () {
         if (products.length > 0) {
             products.pop();
@@ -131,7 +145,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Permite editar um produto ao clicar na tabela
     tableBody.addEventListener('click', function (event) {
         const row = event.target.closest('tr');
         if (row) {
@@ -140,6 +153,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             document.getElementById('identifier').value = product.identifier;
             document.getElementById('quantity').value = product.quantity;
+            if (useValidityCheckbox.checked && product.validity) {
+                validityInput.value = product.validity;
+            }
 
             products.splice(index, 1);
             localStorage.setItem('products', JSON.stringify(products));
