@@ -18,6 +18,13 @@ document.addEventListener('DOMContentLoaded', function () {
         validityContainer.style.display = this.checked ? 'block' : 'none';
     });
 
+    validityInput.addEventListener('input', function (e) {
+        let v = this.value.replace(/\D/g, ''); // Remove não numéricos
+        if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2);
+        if (v.length > 5) v = v.slice(0, 5) + '/' + v.slice(5, 9);
+        this.value = v;
+    });
+
     async function loadProdutos() {
         try {
             const response = await fetch('produtos.json');
@@ -67,6 +74,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const existingProduct = products.find(product => product.identifier === identifier);
         if (existingProduct) {
             existingProduct.quantity += quantity;
+            if (useValidityCheckbox.checked) {
+                existingProduct.validity = validity;
+            }
         } else {
             products.push({ identifier, quantity, validity });
         }
@@ -81,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
     generateFileButton.addEventListener('click', function () {
         try {
             let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;';
-            const usarValidade = useValidityCheckbox.checked;
+            const usarValidade = products.some(p => p.validity); // Inclui validade se pelo menos um produto tiver
             if (usarValidade) {
                 fileContent += 'Validade;';
             }
@@ -153,8 +163,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             document.getElementById('identifier').value = product.identifier;
             document.getElementById('quantity').value = product.quantity;
-            if (useValidityCheckbox.checked && product.validity) {
+            if (product.validity) {
+                useValidityCheckbox.checked = true;
+                validityContainer.style.display = 'block';
                 validityInput.value = product.validity;
+            } else {
+                useValidityCheckbox.checked = false;
+                validityContainer.style.display = 'none';
+                validityInput.value = '';
             }
 
             products.splice(index, 1);
