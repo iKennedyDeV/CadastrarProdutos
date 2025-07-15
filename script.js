@@ -14,12 +14,18 @@ document.addEventListener('DOMContentLoaded', function () {
     let products = JSON.parse(localStorage.getItem('products')) || [];
     let produtosJSON = [];
 
+    // Restaurar estado do checkbox "usar validade"
+    const validadeAtiva = localStorage.getItem('usarValidade') === 'true';
+    useValidityCheckbox.checked = validadeAtiva;
+    validityContainer.style.display = validadeAtiva ? 'block' : 'none';
+
     useValidityCheckbox.addEventListener('change', function () {
         validityContainer.style.display = this.checked ? 'block' : 'none';
+        localStorage.setItem('usarValidade', this.checked); // salvar mudança
     });
 
     validityInput.addEventListener('input', function (e) {
-        let v = this.value.replace(/\D/g, ''); // Remove não numéricos
+        let v = this.value.replace(/\D/g, ''); // remove não numéricos
         if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2);
         if (v.length > 5) v = v.slice(0, 5) + '/' + v.slice(5, 9);
         this.value = v;
@@ -84,6 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem('products', JSON.stringify(products));
         updateTable();
         form.reset();
+        localStorage.setItem('usarValidade', useValidityCheckbox.checked); // salvar estado
         validityContainer.style.display = useValidityCheckbox.checked ? 'block' : 'none';
         document.getElementById('identifier').focus();
     });
@@ -91,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
     generateFileButton.addEventListener('click', function () {
         try {
             let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;';
-            const usarValidade = products.some(p => p.validity); // Inclui validade se pelo menos um produto tiver
+            const usarValidade = products.some(p => p.validity);
             if (usarValidade) {
                 fileContent += 'Validade;';
             }
@@ -163,6 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             document.getElementById('identifier').value = product.identifier;
             document.getElementById('quantity').value = product.quantity;
+
             if (product.validity) {
                 useValidityCheckbox.checked = true;
                 validityContainer.style.display = 'block';
@@ -173,6 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 validityInput.value = '';
             }
 
+            localStorage.setItem('usarValidade', useValidityCheckbox.checked);
             products.splice(index, 1);
             localStorage.setItem('products', JSON.stringify(products));
             updateTable();
