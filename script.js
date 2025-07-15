@@ -88,12 +88,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         localStorage.setItem('products', JSON.stringify(products));
-        updateTable();
-        form.reset();
-        localStorage.setItem('usarValidade', useValidityCheckbox.checked); // salvar estado
-        validityContainer.style.display = useValidityCheckbox.checked ? 'block' : 'none';
-        document.getElementById('identifier').focus();
-    });
+updateTable();
+localStorage.setItem('usarValidade', useValidityCheckbox.checked);
+form.reset();
+validityContainer.style.display = useValidityCheckbox.checked ? 'block' : 'none';
+document.getElementById('identifier').focus();
 
     generateFileButton.addEventListener('click', function () {
         try {
