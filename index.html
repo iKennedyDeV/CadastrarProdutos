@@ -11,27 +11,11 @@
         <h1>Cadastro de Produtos</h1>
         <form id="productForm">
             <label for="identifier">Código ou Código de Barras:</label>
+            <input type="number" id="identifier" name="identifier" placeholder="Digite o Código ou Código de Barras" required><br><br>
             <input type="number" id="identifier" name="identifier" placeholder="Digite o Código ou Código de Barras" autofocus required><br><br>
 
             <label for="quantity">Quantidade:</label>
             <input type="number" id="quantity" name="quantity" placeholder="Digite a quantidade" required><br><br>
-
-            <label>
-                <input type="checkbox" id="useValidity"> Usar validade
-            </label><br><br>
-
-            <div id="validityContainer" style="display: none;">
-                <label for="validity">Validade (dd/mm/aaaa):</label>
-                <input
-                    type="text"
-                    id="validity"
-                    name="validity"
-                    placeholder="ddmmaaaa"
-                    maxlength="10"
-                    inputmode="numeric"
-                    required
-                ><br><br>
-            </div>
 
             <button type="submit">Adicionar Produto</button>
         </form>
@@ -55,6 +39,8 @@
         <button id="generateFile">Gerar Arquivo .csv</button>
     </div>
 
+    <script src="script.js"></script>
+
     <div id="confirmationModal" class="modal" style="display:none;">
         <div class="modal-content">
             <p>Tem certeza de que deseja limpar todos os dados da tabela?</p>
@@ -62,7 +48,5 @@
             <button id="cancelClearTable">Cancelar</button>
         </div>
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
