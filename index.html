@@ -21,8 +21,16 @@
             </label><br><br>
 
             <div id="validityContainer" style="display: none;">
-                <label for="validity">Validade (dd/mm/yyyy):</label>
-                <input type="text" id="validity" name="validity" placeholder="dd/mm/yyyy" pattern="\d{2}/\d{2}/\d{4}" required><br><br>
+                <label for="validity">Validade (dd/mm/aaaa):</label>
+                <input
+                    type="text"
+                    id="validity"
+                    name="validity"
+                    placeholder="ddmmaaaa"
+                    maxlength="10"
+                    inputmode="numeric"
+                    required
+                ><br><br>
             </div>
 
             <button type="submit">Adicionar Produto</button>
