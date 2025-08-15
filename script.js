@@ -66,47 +66,44 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('identifier').focus();
     });
 
-   generateFileButton.addEventListener('click', function () {
-        try {
-            
-            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Validade;Marca;Preco\n';
+  generateFileButton.addEventListener('click', function () {
+    try {
+        let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Validade;Marca;Preco\n';
 
-            products.forEach(product => {
-                const identifier = product.identifier;
-                const matchingProduct = produtosJSON.find(item =>
-                    item["Código de Barras"] === identifier || item["CÓDIGO"] === identifier
-                );
+        products.forEach(product => {
+            const identifier = product.identifier;
 
-        
-                
-                }
+            const matchingProduct = produtosJSON.find(item =>
+                item["Código de Barras"] === identifier || item["CÓDIGO"] === identifier
+            );
 
-                if (matchingProduct) {
-                    const preco = matchingProduct["PREÇO"] ?? '-';
-                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${preco}\n`;
+            if (matchingProduct) {
+                const preco = matchingProduct["PREÇO"] ?? '-';
+                fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};-;${matchingProduct["MARCA"]};${preco}\n`;
+            } else {
+                let codigo = '-';
+                let barras = '-';
+                const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
+                if (isCodigoBarras) {
+                    barras = identifier;
                 } else {
-                    let codigo = '-';
-                    let barras = '-';
-                    const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
-                    if (isCodigoBarras) {
-                        barras = identifier;
-                    } else {
-                        codigo = identifier;
-                    }
-                    fileContent += `${codigo};-;${barras};${product.quantity};-;-\n`;
+                    codigo = identifier;
                 }
-            });
+                fileContent += `${codigo};-;${barras};${product.quantity};-;-;-\n`;
+            }
+        });
 
-            const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'produtos.csv';
-            link.click();
-        } catch (error) {
-            console.error('Erro ao gerar o arquivo CSV:', error);
-            alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
-        }
-    });
+        const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'produtos.csv';
+        link.click();
+    } catch (error) {
+        console.error('Erro ao gerar o arquivo CSV:', error);
+        alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
+    }
+});
+
 
     // Limpa a tabela e o localStorage
     clearTableButton.addEventListener('click', function () {
