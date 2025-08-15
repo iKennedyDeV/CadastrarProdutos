@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   generateFileButton.addEventListener('click', function () {
     try {
-        let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Validade;Marca;Preco\n';
+        let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca;Preco\n';
 
         products.forEach(product => {
             const identifier = product.identifier;
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     codigo = identifier;
                 }
-                fileContent += `${codigo};-;${barras};${product.quantity};-;-;-\n`;
+                fileContent += `${codigo};-;${barras};${product.quantity};-;-\n`;
             }
         });
 
