@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (matchingProduct) {
                 const preco = matchingProduct["PREÇO"] ?? '-';
-                fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};-;${matchingProduct["MARCA"]};${preco}\n`;
+                fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${preco}\n`;
             } else {
                 let codigo = '-';
                 let barras = '-';
