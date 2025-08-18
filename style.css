@@ -1,32 +1,39 @@
-a estilização posso colocar no css , altere o html   
-
 /* Container principal */
 .container {
     background-color: #ffffff;
     padding: 20px;
     border-radius: 8px;
-    width: 81%;
+    width: 80%;
     max-width: 800px;
+    margin: 0 auto; /* centraliza no desktop */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
 }
 
 /* Título */
 h1 {
     text-align: center;
     color: #333;
+    font-size: 2em;
+    margin-bottom: 20px;
 }
 
 /* Formulário */
 form {
     margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
 }
-.cuidado{
 
-color: white;
-background-color: #f53;
-border-radius: 5px;
- }
- 
+.cuidado {
+    color: white;
+    background-color: #f53;
+    border-radius: 5px;
+    padding: 5px 10px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
 form label {
     font-weight: bold;
     margin-bottom: 5px;
@@ -40,6 +47,7 @@ form input {
     margin: 5px 0 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    box-sizing: border-box;
 }
 
 form input[type="checkbox"] {
@@ -77,6 +85,8 @@ table {
     margin-top: 20px;
     border-collapse: collapse;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+    display: block;
 }
 
 table th, table td {
@@ -117,22 +127,9 @@ button#generateFile:hover {
     background-color: #218838;
 }
 
-/* Estilo responsivo */
-@media (max-width: 768px) {
-    .container {
-        width: 95%;
- 
-    }
-
-    form input,
-    form button,
-    button#generateFile {
-        font-size: 14px;
-    }
-}
-#limpar{
- background-color:red ;
- color: white;
+#limpar {
+    background-color: red;
+    color: white;
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
@@ -141,34 +138,33 @@ button#generateFile:hover {
     margin-top: 15px;
     display: block;
     width: 100%;
-    transition:background-color 0.3s;
+    transition: background-color 0.3s;
 }
-/* Estilo do modal */
+
+/* Modal */
 .modal {
     display: none;
     position: fixed;
-    z-index: 1;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.5);
     padding-top: 60px;
 }
 
-/* Conteúdo do modal */
 .modal-content {
     background-color: #fff;
     margin: 5% auto;
     padding: 20px;
     border-radius: 8px;
-    width: 80%;
+    width: 90%;
     max-width: 400px;
     text-align: center;
 }
 
-/* Botões de confirmação */
 button {
     padding: 10px 20px;
     margin: 10px;
@@ -179,7 +175,6 @@ button:hover {
     background-color: #ddd;
 }
 
-/* Estilos para os botões de confirmação */
 #confirmClearTable {
     background-color: #4CAF50;
     color: white;
@@ -190,4 +185,53 @@ button:hover {
     background-color: #f44336;
     color: white;
     border: none;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    .container {
+        width: 90%;
+    }
+
+    form input, form button, button#generateFile {
+        font-size: 15px;
+    }
+
+    table th, table td {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    form input, form button, button#generateFile {
+        font-size: 14px;
+    }
+
+    table th, table td {
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5em;
+    }
+
+    form input, form button, button#generateFile {
+        font-size: 13px;
+        padding: 8px;
+    }
+
+    table {
+        font-size: 12px;
+    }
 }
