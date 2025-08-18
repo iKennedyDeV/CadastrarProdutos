@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                    
 
-                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${precoFormatado};${totalFormatado}\n`;
+                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${preco};${total}\n`;
                 } else {
                     let codigo = '-';
                     let barras = '-';
