@@ -7,26 +7,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmationModal = document.getElementById('confirmationModal');
     const confirmClearButton = document.getElementById('confirmClearTable');
     const cancelClearButton = document.getElementById('cancelClearTable');
-    const validityInput = document.getElementById('validity');
 
     let products = JSON.parse(localStorage.getItem('products')) || [];
     let produtosJSON = [];
 
-    // Máscara automática para validade MM/AA ou DD/MM/AA
-    validityInput.addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
-
-        if (value.length <= 4) {
-            // MM/AA
-            value = value.slice(0, 2) + (value.length > 2 ? '/' + value.slice(2) : '');
-        } else if (value.length <= 6) {
-            // DD/MM/AA
-            value = value.slice(0, 2) + '/' + value.slice(2, 4) + '/' + value.slice(4);
-        }
-
-        e.target.value = value;
-    });
-
+    // Função para carregar o arquivo JSON e normalizar os dados
     async function loadProdutos() {
         try {
             const response = await fetch('produtos.json');
@@ -44,42 +29,35 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Chama a função de carregamento do JSON
     loadProdutos();
 
+    // Atualiza a tabela com os dados armazenados
     function updateTable() {
         tableBody.innerHTML = '';
         products.forEach((product, index) => {
             const row = document.createElement('tr');
-            row.innerHTML = `<td>${product.identifier}</td><td>${product.quantity}</td><td>${product.validity || '-'}</td>`;
+            row.innerHTML = `<td>${product.identifier}</td><td>${product.quantity}</td>`;
             row.dataset.index = index;
             tableBody.appendChild(row);
         });
     }
 
+    // Atualiza a tabela na inicialização
     updateTable();
 
+    // Adiciona ou atualiza um produto na lista
     form.addEventListener('submit', function (event) {
         event.preventDefault();
 
         const identifier = String(document.getElementById('identifier').value).trim();
         const quantity = parseInt(document.getElementById('quantity').value, 10);
-        const validity = document.getElementById('validity').value.trim();
-
-        const isMMYY = /^\d{2}\/\d{2}$/.test(validity);
-        const isDDMMYY = /^\d{2}\/\d{2}\/\d{2}$/.test(validity);
-
-        if (validity && !(isMMYY || isDDMMYY)) {
-            alert('Formato de validade inválido. Use MM/AA ou DD/MM/AA.');
-            return;
-        }
 
         const existingProduct = products.find(product => product.identifier === identifier);
-
         if (existingProduct) {
             existingProduct.quantity += quantity;
-            existingProduct.validity = validity;
         } else {
-            products.push({ identifier, quantity, validity });
+            products.push({ identifier, quantity });
         }
 
         localStorage.setItem('products', JSON.stringify(products));
@@ -88,45 +66,46 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('identifier').focus();
     });
 
-   function updateTable() {
-    tableBody.innerHTML = '';
-    products.forEach((product, index) => {
-        const matchingProduct = produtosJSON.find(item =>
-            item["Código de Barras"] === product.identifier || item["CÓDIGO"] === product.identifier
-        );
+  generateFileButton.addEventListener('click', function () {
+    try {
+        let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca;Preco\n';
 
-        let preco = 0;
-        if (matchingProduct) {
-            preco = matchingProduct["PREÇO"] ?? 0;
-        }
+        products.forEach(product => {
+            const identifier = product.identifier;
 
-        const total = preco * product.quantity;
+            const matchingProduct = produtosJSON.find(item =>
+                item["Código de Barras"] === identifier || item["CÓDIGO"] === identifier
+            );
 
-        const totalFormatado = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            if (matchingProduct) {
+                const preco = matchingProduct["PREÇO"] ?? '-';
+                fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${preco}\n`;
+            } else {
+                let codigo = '-';
+                let barras = '-';
+                const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
+                if (isCodigoBarras) {
+                    barras = identifier;
+                } else {
+                    codigo = identifier;
+                }
+                fileContent += `${codigo};-;${barras};${product.quantity};-;-\n`;
+            }
+        });
 
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${product.identifier}</td>
-            <td>${product.quantity}</td>
-            <td>${product.validity || '-'}</td>
-            <td>${totalFormatado}</td>
-        `;
-        row.dataset.index = index;
-        tableBody.appendChild(row);
-    });
-}
+        const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'produtos.csv';
+        link.click();
+    } catch (error) {
+        console.error('Erro ao gerar o arquivo CSV:', error);
+        alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
+    }
+});
 
-            const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'produtos.csv';
-            link.click();
-        } catch (error) {
-            console.error('Erro ao gerar o arquivo CSV:', error);
-            alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
-        }
-    });
 
+    // Limpa a tabela e o localStorage
     clearTableButton.addEventListener('click', function () {
         confirmationModal.style.display = 'block';
     });
@@ -142,6 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmationModal.style.display = 'none';
     });
 
+    // Remove o último produto da lista
     removeLastButton.addEventListener('click', function () {
         if (products.length > 0) {
             products.pop();
@@ -150,24 +130,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    tableBody.addEventListener('click', function(event) {
+    // Permite editar um produto ao clicar na tabela
+    tableBody.addEventListener('click', function (event) {
         const row = event.target.closest('tr');
-        if (!row) return;
+        if (row) {
+            const index = row.dataset.index;
+            const product = products[index];
 
-        const index = parseInt(row.dataset.index, 10);
-        if (isNaN(index)) return;
+            document.getElementById('identifier').value = product.identifier;
+            document.getElementById('quantity').value = product.quantity;
 
-        const product = products[index];
-
-        // Coloca os valores atuais no formulário para edição
-        document.getElementById('identifier').value = product.identifier;
-        document.getElementById('quantity').value = product.quantity;
-        document.getElementById('validity').value = product.validity || '';
-
-        // Remove do array para evitar duplicação no submit
-        products.splice(index, 1);
-        localStorage.setItem('products', JSON.stringify(products));
-        updateTable();
+            products.splice(index, 1);
+            localStorage.setItem('products', JSON.stringify(products));
+            updateTable();
+        }
     });
-
-});acrescente a coluna que multiplica a quantidade com  o valor do produto 
+});
