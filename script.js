@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   generateFileButton.addEventListener('click', function () {
     try {
-        let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca;Preco\n';
+        let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca;Preco;Total\n'; // Adicionei coluna Total
 
         products.forEach(product => {
             const identifier = product.identifier;
@@ -78,8 +78,9 @@ document.addEventListener('DOMContentLoaded', function () {
             );
 
             if (matchingProduct) {
-                const preco = matchingProduct["PREÇO"] ?? '-';
-                fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${preco}\n`;
+                const preco = parseFloat(matchingProduct["PREÇO"]) || 0; // garante número
+                const total = preco * product.quantity;
+                fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${preco.toFixed(2)};${total.toFixed(2)}\n`;
             } else {
                 let codigo = '-';
                 let barras = '-';
@@ -89,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     codigo = identifier;
                 }
-                fileContent += `${codigo};-;${barras};${product.quantity};-;-\n`;
+                fileContent += `${codigo};-;${barras};${product.quantity};-;-;-\n`;
             }
         });
 
@@ -103,6 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
         alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
     }
 });
+
 
 
     // Limpa a tabela e o localStorage
