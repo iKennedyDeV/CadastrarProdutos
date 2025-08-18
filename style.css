@@ -1,3 +1,5 @@
+a estilização posso colocar no css , altere o html   
+
 /* Container principal */
 .container {
     background-color: #ffffff;
@@ -18,7 +20,13 @@ h1 {
 form {
     margin-bottom: 20px;
 }
+.cuidado{
 
+color: white;
+background-color: #f53;
+border-radius: 5px;
+ }
+ 
 form label {
     font-weight: bold;
     margin-bottom: 5px;
@@ -63,43 +71,6 @@ form button#removeLast:hover {
     background-color: #e0a800;
 }
 
-/* Botões extras */
-button#generateFile {
-    background-color: #28a745;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 15px;
-    display: block;
-    width: 100%;
-    transition: background-color 0.3s;
-}
-
-button#generateFile:hover {
-    background-color: #218838;
-}
-
-#limpar {
-    background-color: red;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 15px;
-    display: block;
-    width: 100%;
-    transition: background-color 0.3s;
-}
-
-#limpar:hover {
-    background-color: #c00;
-}
-
 /* Tabela */
 table {
     width: 100%;
@@ -127,10 +98,30 @@ table tbody tr:hover {
     background-color: #f1f1f1;
 }
 
+/* Botões extras */
+button#generateFile {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 15px;
+    display: block;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+button#generateFile:hover {
+    background-color: #218838;
+}
+
 /* Estilo responsivo */
 @media (max-width: 768px) {
     .container {
         width: 95%;
+ 
     }
 
     form input,
@@ -139,8 +130,20 @@ table tbody tr:hover {
         font-size: 14px;
     }
 }
-
-/* Estilo dos modais */
+#limpar{
+ background-color:red ;
+ color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 15px;
+    display: block;
+    width: 100%;
+    transition:background-color 0.3s;
+}
+/* Estilo do modal */
 .modal {
     display: none;
     position: fixed;
@@ -154,7 +157,7 @@ table tbody tr:hover {
     padding-top: 60px;
 }
 
-/* Conteúdo dos modais */
+/* Conteúdo do modal */
 .modal-content {
     background-color: #fff;
     margin: 5% auto;
@@ -166,28 +169,25 @@ table tbody tr:hover {
 }
 
 /* Botões de confirmação */
-.modal-content button {
+button {
     padding: 10px 20px;
     margin: 10px;
     cursor: pointer;
-    border: none;
-    border-radius: 5px;
 }
 
-/* Estilos para os botões dos modais */
-#confirmClearTable, #confirmEdit {
+button:hover {
+    background-color: #ddd;
+}
+
+/* Estilos para os botões de confirmação */
+#confirmClearTable {
     background-color: #4CAF50;
     color: white;
+    border: none;
 }
 
-#cancelClearTable, #cancelEdit {
+#cancelClearTable {
     background-color: #f44336;
     color: white;
-}
-
-/* Botão com alerta especial */
-.cuidado {
-    color: white;
-    background-color: #f53;
-    border-radius: 5px;
+    border: none;
 }
