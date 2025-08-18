@@ -7,21 +7,51 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmationModal = document.getElementById('confirmationModal');
     const confirmClearButton = document.getElementById('confirmClearTable');
     const cancelClearButton = document.getElementById('cancelClearTable');
-
-    const editModal = document.getElementById('editModal');
-    const confirmEditButton = document.getElementById('confirmEdit');
-    const cancelEditButton = document.getElementById('cancelEdit');
-    const editMessage = document.getElementById('editMessage');
+    const validityInput = document.getElementById('validity');
 
     let products = JSON.parse(localStorage.getItem('products')) || [];
-    let editIndex = null;
+    let produtosJSON = [];
+
+    // Máscara automática para validade MM/AA ou DD/MM/AA
+    validityInput.addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+
+        if (value.length <= 4) {
+            // MM/AA
+            value = value.slice(0, 2) + (value.length > 2 ? '/' + value.slice(2) : '');
+        } else if (value.length <= 6) {
+            // DD/MM/AA
+            value = value.slice(0, 2) + '/' + value.slice(2, 4) + '/' + value.slice(4);
+        }
+
+        e.target.value = value;
+    });
+
+    async function loadProdutos() {
+        try {
+            const response = await fetch('produtos.json');
+            if (!response.ok) {
+                throw new Error('Erro ao carregar o arquivo JSON');
+            }
+            const jsonData = await response.json();
+            produtosJSON = jsonData.map(item => ({
+                ...item,
+                "Código de Barras": String(item["Código de Barras"]).trim(),
+                "CÓDIGO": String(item["CÓDIGO"]).trim()
+            }));
+        } catch (error) {
+            console.error('Erro ao carregar os dados do JSON:', error);
+        }
+    }
+
+    loadProdutos();
 
     function updateTable() {
         tableBody.innerHTML = '';
         products.forEach((product, index) => {
             const row = document.createElement('tr');
+            row.innerHTML = `<td>${product.identifier}</td><td>${product.quantity}</td><td>${product.validity || '-'}</td>`;
             row.dataset.index = index;
-            row.innerHTML = `<td>${product.identifier}</td><td>${product.quantity}</td>`;
             tableBody.appendChild(row);
         });
     }
@@ -30,60 +60,87 @@ document.addEventListener('DOMContentLoaded', function () {
 
     form.addEventListener('submit', function (event) {
         event.preventDefault();
-        const identifier = document.getElementById('identifier').value.trim();
-        const quantity = parseInt(document.getElementById('quantity').value);
 
-        if (!identifier || isNaN(quantity) || quantity <= 0) {
-            alert("Preencha código e quantidade corretamente!");
+        const identifier = String(document.getElementById('identifier').value).trim();
+        const quantity = parseInt(document.getElementById('quantity').value, 10);
+        const validity = document.getElementById('validity').value.trim();
+
+        const isMMYY = /^\d{2}\/\d{2}$/.test(validity);
+        const isDDMMYY = /^\d{2}\/\d{2}\/\d{2}$/.test(validity);
+
+        if (validity && !(isMMYY || isDDMMYY)) {
+            alert('Formato de validade inválido. Use MM/AA ou DD/MM/AA.');
             return;
         }
 
-        if (editIndex !== null) {
-            products[editIndex] = { identifier, quantity };
-            editIndex = null;
+        const existingProduct = products.find(product => product.identifier === identifier);
+
+        if (existingProduct) {
+            existingProduct.quantity += quantity;
+            existingProduct.validity = validity;
         } else {
-            products.push({ identifier, quantity });
+            products.push({ identifier, quantity, validity });
         }
 
         localStorage.setItem('products', JSON.stringify(products));
         updateTable();
         form.reset();
+        document.getElementById('identifier').focus();
     });
 
-    tableBody.addEventListener('click', function (event) {
-        const row = event.target.closest('tr');
-        if (!row) return;
-        editIndex = row.dataset.index;
-        const product = products[editIndex];
-        editMessage.textContent = `Deseja editar o item:\nCódigo: ${product.identifier}\nQuantidade: ${product.quantity}?`;
-        editModal.style.display = 'flex';
-    });
+    generateFileButton.addEventListener('click', function () {
+        try {
+            // Cabeçalho atualizado → inclui "Total"
+            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Validade;Marca;Preco;Qtd/Valor\n';
 
-    confirmEditButton.addEventListener('click', function () {
-        const product = products[editIndex];
-        document.getElementById('identifier').value = product.identifier;
-        document.getElementById('quantity').value = product.quantity;
-        editModal.style.display = 'none';
-        products.splice(editIndex, 1);
-        localStorage.setItem('products', JSON.stringify(products));
-        updateTable();
-    });
+            products.forEach(product => {
+                const identifier = product.identifier;
+                const matchingProduct = produtosJSON.find(item =>
+                    item["Código de Barras"] === identifier || item["CÓDIGO"] === identifier
+                );
 
-    cancelEditButton.addEventListener('click', function () {
-        editModal.style.display = 'none';
-        editIndex = null;
-    });
+                // Ajusta validade: se for MM/AA → 30/MM/AA
+                let validadeFormatada = product.validity || '-';
+                if (/^\d{2}\/\d{2}$/.test(validadeFormatada)) {
+                    validadeFormatada = '30/' + validadeFormatada;
+                }
 
-    removeLastButton.addEventListener('click', function () {
-        if (products.length > 0) {
-            products.pop();
-            localStorage.setItem('products', JSON.stringify(products));
-            updateTable();
+                if (matchingProduct) {
+                    const preco = matchingProduct["PREÇO"] ?? 0;
+                    const total = preco * product.quantity;
+
+                    // Formata preço e total em moeda BRL
+                    const precoFormatado = preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    const totalFormatado = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${validadeFormatada};${matchingProduct["MARCA"]};${precoFormatado};${totalFormatado}\n`;
+                } else {
+                    let codigo = '-';
+                    let barras = '-';
+                    const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
+                    if (isCodigoBarras) {
+                        barras = identifier;
+                    } else {
+                        codigo = identifier;
+                    }
+                    // Sem preço → Total também fica "-"
+                    fileContent += `${codigo};-;${barras};${product.quantity};${validadeFormatada};-;-;-\n`;
+                }
+            });
+
+            const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'produtos.csv';
+            link.click();
+        } catch (error) {
+            console.error('Erro ao gerar o arquivo CSV:', error);
+            alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
         }
     });
 
     clearTableButton.addEventListener('click', function () {
-        confirmationModal.style.display = 'flex';
+        confirmationModal.style.display = 'block';
     });
 
     cancelClearButton.addEventListener('click', function () {
@@ -97,19 +154,32 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmationModal.style.display = 'none';
     });
 
-    generateFileButton.addEventListener('click', function () {
-        if (products.length === 0) {
-            alert("Nenhum produto para gerar CSV!");
-            return;
+    removeLastButton.addEventListener('click', function () {
+        if (products.length > 0) {
+            products.pop();
+            localStorage.setItem('products', JSON.stringify(products));
+            updateTable();
         }
-        let fileContent = 'Codigo;Quantidade\n';
-        products.forEach(p => {
-            fileContent += `${p.identifier};${p.quantity}\n`;
-        });
-        const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'produtos.csv';
-        link.click();
     });
-});
+
+    tableBody.addEventListener('click', function(event) {
+        const row = event.target.closest('tr');
+        if (!row) return;
+
+        const index = parseInt(row.dataset.index, 10);
+        if (isNaN(index)) return;
+
+        const product = products[index];
+
+        // Coloca os valores atuais no formulário para edição
+        document.getElementById('identifier').value = product.identifier;
+        document.getElementById('quantity').value = product.quantity;
+        document.getElementById('validity').value = product.validity || '';
+
+        // Remove do array para evitar duplicação no submit
+        products.splice(index, 1);
+        localStorage.setItem('products', JSON.stringify(products));
+        updateTable();
+    });
+
+});acrescente a coluna que multiplica a quantidade com  o valor do produto 
