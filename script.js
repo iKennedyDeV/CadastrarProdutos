@@ -80,6 +80,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (matchingProduct) {
                 const preco = parseFloat(matchingProduct["PREÇO"]) || 0; // garante número
                 const total = preco * product.quantity;
+                 const precoFormatado = preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    const totalFormatado = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                 fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${preco.toFixed(2)};${total.toFixed(2)}\n`;
             } else {
                 let codigo = '-';
