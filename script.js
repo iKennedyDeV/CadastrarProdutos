@@ -49,23 +49,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Adiciona produto
     form.addEventListener('submit', function (event) {
-        event.preventDefault();
+    event.preventDefault(); // 🚫 impede o reload da página
 
-        const identifier = String(document.getElementById('identifier').value).trim();
-        const quantity = parseInt(document.getElementById('quantity').value, 10);
+    const identifier = document.getElementById('identifier').value.trim();
+    const quantity = parseInt(document.getElementById('quantity').value);
 
-        const existingProduct = products.find(product => product.identifier === identifier);
-        if (existingProduct) {
-            existingProduct.quantity += quantity;
-        } else {
-            products.push({ identifier, quantity });
-        }
+    if (!identifier || isNaN(quantity) || quantity <= 0) {
+        alert("Preencha código e quantidade corretamente!");
+        return;
+    }
 
-        localStorage.setItem('products', JSON.stringify(products));
-        updateTable();
-        form.reset();
-        document.getElementById('identifier').focus();
-    });
+    // Adiciona no array
+    products.push({ identifier, quantity });
+
+    // Salva no localStorage
+    localStorage.setItem('products', JSON.stringify(products));
+
+    // Atualiza tabela
+    updateTable();
+
+    // Limpa o formulário
+    form.reset();
+});
+
 
     // Gerar CSV
     generateFileButton.addEventListener('click', function () {
