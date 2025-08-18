@@ -88,45 +88,33 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('identifier').focus();
     });
 
-    generateFileButton.addEventListener('click', function () {
-        try {
-            // Cabeçalho atualizado → inclui "Total"
-            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Validade;Marca;Preco;Qtd/Valor\n';
+   function updateTable() {
+    tableBody.innerHTML = '';
+    products.forEach((product, index) => {
+        const matchingProduct = produtosJSON.find(item =>
+            item["Código de Barras"] === product.identifier || item["CÓDIGO"] === product.identifier
+        );
 
-            products.forEach(product => {
-                const identifier = product.identifier;
-                const matchingProduct = produtosJSON.find(item =>
-                    item["Código de Barras"] === identifier || item["CÓDIGO"] === identifier
-                );
+        let preco = 0;
+        if (matchingProduct) {
+            preco = matchingProduct["PREÇO"] ?? 0;
+        }
 
-                // Ajusta validade: se for MM/AA → 30/MM/AA
-                let validadeFormatada = product.validity || '-';
-                if (/^\d{2}\/\d{2}$/.test(validadeFormatada)) {
-                    validadeFormatada = '30/' + validadeFormatada;
-                }
+        const total = preco * product.quantity;
 
-                if (matchingProduct) {
-                    const preco = matchingProduct["PREÇO"] ?? 0;
-                    const total = preco * product.quantity;
+        const totalFormatado = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-                    // Formata preço e total em moeda BRL
-                    const precoFormatado = preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                    const totalFormatado = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${validadeFormatada};${matchingProduct["MARCA"]};${precoFormatado};${totalFormatado}\n`;
-                } else {
-                    let codigo = '-';
-                    let barras = '-';
-                    const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
-                    if (isCodigoBarras) {
-                        barras = identifier;
-                    } else {
-                        codigo = identifier;
-                    }
-                    // Sem preço → Total também fica "-"
-                    fileContent += `${codigo};-;${barras};${product.quantity};${validadeFormatada};-;-;-\n`;
-                }
-            });
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${product.identifier}</td>
+            <td>${product.quantity}</td>
+            <td>${product.validity || '-'}</td>
+            <td>${totalFormatado}</td>
+        `;
+        row.dataset.index = index;
+        tableBody.appendChild(row);
+    });
+}
 
             const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
