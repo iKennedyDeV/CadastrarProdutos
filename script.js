@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   generateFileButton.addEventListener('click', function () {
     try {
-        let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca;Preco;Total\n'; // Adicionei coluna Total
+        let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca;Preco;Total\n'; // Coluna Total
 
         products.forEach(product => {
             const identifier = product.identifier;
@@ -78,9 +78,14 @@ document.addEventListener('DOMContentLoaded', function () {
             );
 
             if (matchingProduct) {
-                const preco = parseFloat(matchingProduct["PREÇO"]) || 0; // garante número
+                const preco = parseFloat(matchingProduct["PREÇO"]) || 0;
                 const total = preco * product.quantity;
-                fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${preco.toFixed(2)};${total.toFixed(2)}\n`;
+
+                // Converte para Real brasileiro
+                const precoBR = preco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const totalBR = total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${precoBR};${totalBR}\n`;
             } else {
                 let codigo = '-';
                 let barras = '-';
@@ -104,6 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
         alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
     }
 });
+
 
 
 
