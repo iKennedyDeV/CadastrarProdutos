@@ -48,8 +48,8 @@ document.addEventListener('DOMContentLoaded', function () {
     updateTable();
 
     // Adiciona produto
-    form.addEventListener('submit', function (event) {
-    event.preventDefault(); // 🚫 impede o reload da página
+   form.addEventListener('submit', function (event) {
+    event.preventDefault();
 
     const identifier = document.getElementById('identifier').value.trim();
     const quantity = parseInt(document.getElementById('quantity').value);
@@ -59,18 +59,19 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    // Adiciona no array
-    products.push({ identifier, quantity });
+    // Se estiver editando, substitui o item
+    if (editIndex !== null) {
+        products[editIndex] = { identifier, quantity };
+        editIndex = null;
+    } else {
+        products.push({ identifier, quantity });
+    }
 
-    // Salva no localStorage
     localStorage.setItem('products', JSON.stringify(products));
-
-    // Atualiza tabela
     updateTable();
-
-    // Limpa o formulário
     form.reset();
 });
+
 
 
     // Gerar CSV
