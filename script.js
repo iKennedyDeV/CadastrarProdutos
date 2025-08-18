@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
 
                 if (matchingProduct) {
-                    const preco = parseFloat(matchingProduct["PREÇO"].toString().replace(',', '.')) || 0;
+                    const preco = parseFloat(matchingProduct["PREÇO"].toString().replace('.', ',')) || 0;
                     const total = preco * product.quantity;
 
                    
