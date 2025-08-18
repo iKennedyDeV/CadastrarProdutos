@@ -8,16 +8,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmClearButton = document.getElementById('confirmClearTable');
     const cancelClearButton = document.getElementById('cancelClearTable');
 
+    // Modal de edição
+    const editModal = document.getElementById('editModal');
+    const confirmEditButton = document.getElementById('confirmEdit');
+    const cancelEditButton = document.getElementById('cancelEdit');
+    const editMessage = document.getElementById('editMessage');
+
+    let editIndex = null;
     let products = JSON.parse(localStorage.getItem('products')) || [];
     let produtosJSON = [];
 
-    // Função para carregar o arquivo JSON e normalizar os dados
+    // Carrega produtos JSON (com preços, descrições etc)
     async function loadProdutos() {
         try {
             const response = await fetch('produtos.json');
-            if (!response.ok) {
-                throw new Error('Erro ao carregar o arquivo JSON');
-            }
+            if (!response.ok) throw new Error('Erro ao carregar JSON');
             const jsonData = await response.json();
             produtosJSON = jsonData.map(item => ({
                 ...item,
@@ -25,14 +30,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 "CÓDIGO": String(item["CÓDIGO"]).trim()
             }));
         } catch (error) {
-            console.error('Erro ao carregar os dados do JSON:', error);
+            console.error('Erro ao carregar JSON:', error);
         }
     }
-
-    // Chama a função de carregamento do JSON
     loadProdutos();
 
-    // Atualiza a tabela com os dados armazenados
+    // Atualiza tabela
     function updateTable() {
         tableBody.innerHTML = '';
         products.forEach((product, index) => {
@@ -42,11 +45,9 @@ document.addEventListener('DOMContentLoaded', function () {
             tableBody.appendChild(row);
         });
     }
-
-    // Atualiza a tabela na inicialização
     updateTable();
 
-    // Adiciona ou atualiza um produto na lista
+    // Adiciona produto
     form.addEventListener('submit', function (event) {
         event.preventDefault();
 
@@ -66,54 +67,54 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('identifier').focus();
     });
 
-  generateFileButton.addEventListener('click', function () {
-    try {
-        let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca;Preco\n';
+    // Gerar CSV
+    generateFileButton.addEventListener('click', function () {
+        try {
+            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca;Preco;Total\n';
 
-        products.forEach(product => {
-            const identifier = product.identifier;
+            products.forEach(product => {
+                const identifier = product.identifier;
 
-            const matchingProduct = produtosJSON.find(item =>
-                item["Código de Barras"] === identifier || item["CÓDIGO"] === identifier
-            );
+                const matchingProduct = produtosJSON.find(item =>
+                    item["Código de Barras"] === identifier || item["CÓDIGO"] === identifier
+                );
 
-            if (matchingProduct) {
-                const preco = matchingProduct["PREÇO"] ?? '-';
-                fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${preco}\n`;
-            } else {
-                let codigo = '-';
-                let barras = '-';
-                const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
-                if (isCodigoBarras) {
-                    barras = identifier;
+                if (matchingProduct) {
+                    const preco = Number(matchingProduct["PREÇO"]) || 0;
+                    const total = preco * product.quantity;
+
+                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${preco};${total}\n`;
                 } else {
-                    codigo = identifier;
+                    let codigo = '-';
+                    let barras = '-';
+                    const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
+                    if (isCodigoBarras) {
+                        barras = identifier;
+                    } else {
+                        codigo = identifier;
+                    }
+                    fileContent += `${codigo};-;${barras};${product.quantity};-;-;-\n`;
                 }
-                fileContent += `${codigo};-;${barras};${product.quantity};-;-\n`;
-            }
-        });
+            });
 
-        const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'produtos.csv';
-        link.click();
-    } catch (error) {
-        console.error('Erro ao gerar o arquivo CSV:', error);
-        alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
-    }
-});
-
-
-    // Limpa a tabela e o localStorage
-    clearTableButton.addEventListener('click', function () {
-        confirmationModal.style.display = 'block';
+            const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'produtos.csv';
+            link.click();
+        } catch (error) {
+            console.error('Erro ao gerar CSV:', error);
+            alert('Erro ao gerar o arquivo CSV.');
+        }
     });
 
+    // Limpar tabela (modal)
+    clearTableButton.addEventListener('click', function () {
+        confirmationModal.style.display = 'flex';
+    });
     cancelClearButton.addEventListener('click', function () {
         confirmationModal.style.display = 'none';
     });
-
     confirmClearButton.addEventListener('click', function () {
         products = [];
         localStorage.removeItem('products');
@@ -121,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmationModal.style.display = 'none';
     });
 
-    // Remove o último produto da lista
+    // Remover último
     removeLastButton.addEventListener('click', function () {
         if (products.length > 0) {
             products.pop();
@@ -130,19 +131,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Permite editar um produto ao clicar na tabela
+    // Clique na tabela → abre modal de edição
     tableBody.addEventListener('click', function (event) {
         const row = event.target.closest('tr');
-        if (row) {
-            const index = row.dataset.index;
-            const product = products[index];
-
-            document.getElementById('identifier').value = product.identifier;
-            document.getElementById('quantity').value = product.quantity;
-
-            products.splice(index, 1);
-            localStorage.setItem('products', JSON.stringify(products));
-            updateTable();
-        }
-    });
-});
