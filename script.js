@@ -88,8 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const preco = parseFloat(matchingProduct["PREÇO"].toString().replace(',', '.')) || 0;
                     const total = preco * product.quantity;
 
-                    const precoFormatado = preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                    const totalFormatado = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                   
 
                     fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${precoFormatado};${totalFormatado}\n`;
                 } else {
