@@ -72,48 +72,51 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Geração de CSV
-    generateFileButton.addEventListener('click', function () {
-        try {
-            let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca;Preco;Total\n';
+   generateFileButton.addEventListener('click', function () {
+    try {
+        let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca;Preco;Total\n';
 
-            products.forEach(product => {
-                const identifier = product.identifier.trim().toUpperCase();
+        products.forEach(product => {
+            const identifier = product.identifier.trim().toUpperCase();
 
-                const matchingProduct = produtosJSON.find(item =>
-                    item["Código de Barras"].trim() === identifier ||
-                    item["CÓDIGO"].trim().toUpperCase() === identifier
-                );
+            const matchingProduct = produtosJSON.find(item =>
+                item["Código de Barras"].trim() === identifier ||
+                item["CÓDIGO"].trim().toUpperCase() === identifier
+            );
 
-                if (matchingProduct) {
-                    const preco = parseFloat(matchingProduct["PREÇO"].toString().replace(',', '.')) || 0;
-                    const total = preco * product.quantity;
+            if (matchingProduct) {
+                const preco = parseFloat(matchingProduct["PREÇO"].toString().replace(',', '.')) || 0;
+                const total = preco * product.quantity;
 
-                   
+                // ✅ Formata para padrão brasileiro (vírgula como separador decimal)
+                const precoFormatado = preco.toFixed(2).replace('.', ',');
+                const totalFormatado = total.toFixed(2).replace('.', ',');
 
-                    fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${preco};${total}\n`;
+                fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${precoFormatado};${totalFormatado}\n`;
+            } else {
+                let codigo = '-';
+                let barras = '-';
+                const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
+                if (isCodigoBarras) {
+                    barras = identifier;
                 } else {
-                    let codigo = '-';
-                    let barras = '-';
-                    const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
-                    if (isCodigoBarras) {
-                        barras = identifier;
-                    } else {
-                        codigo = identifier;
-                    }
-                    fileContent += `${codigo};-;${barras};${product.quantity};-;-;-\n`;
+                    codigo = identifier;
                 }
-            });
+                fileContent += `${codigo};-;${barras};${product.quantity};-;-;-\n`;
+            }
+        });
 
-            const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'produtos.csv';
-            link.click();
-        } catch (error) {
-            console.error('Erro ao gerar o arquivo CSV:', error);
-            alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
-        }
-    });
+        // Gera e baixa o CSV
+        const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'produtos.csv';
+        link.click();
+    } catch (error) {
+        console.error('Erro ao gerar o arquivo CSV:', error);
+        alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
+    }
+});
 
     // Limpa a tabela e o localStorage
     clearTableButton.addEventListener('click', function () {
