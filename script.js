@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const identifier = String(document.getElementById('identifier').value).trim();
         const quantity = parseInt(document.getElementById('quantity').value, 10) || 0;
 
-        if (quantity <= 0) {
+        if (quantity < 0) {
             alert('Quantidade inválida!');
             return;
         }
