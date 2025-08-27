@@ -72,9 +72,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Geração de CSV
-   generateFileButton.addEventListener('click', function () {
+generateFileButton.addEventListener('click', function () {
     try {
-        let fileContent = 'Codigo;Descricao;Codigo de Barras;Quantidade;Marca;Preco;Total\n';
+        // Cabeçalho atualizado
+        let fileContent = 'Codigo;Descricao;Codigo de Barras;Marca;Quantidade;Preco;Qtd/Valor\n';
+
+        let totalQuantidade = 0;
+        let totalPreco = 0;
+        let totalGeral = 0;
 
         products.forEach(product => {
             const identifier = product.identifier.trim().toUpperCase();
@@ -88,11 +93,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 const preco = parseFloat(matchingProduct["PREÇO"].toString().replace(',', '.')) || 0;
                 const total = preco * product.quantity;
 
-                // ✅ Formata para padrão brasileiro (vírgula como separador decimal)
+                //  Formata para padrão brasileiro
                 const precoFormatado = preco.toFixed(2).replace('.', ',');
                 const totalFormatado = total.toFixed(2).replace('.', ',');
 
-                fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${product.quantity};${matchingProduct["MARCA"]};${precoFormatado};${totalFormatado}\n`;
+                fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${matchingProduct["MARCA"]};${product.quantity};${precoFormatado};${totalFormatado}\n`;
+
+                // Acumula totais
+                totalQuantidade += product.quantity;
+                totalPreco += preco;
+                totalGeral += total;
             } else {
                 let codigo = '-';
                 let barras = '-';
@@ -102,9 +112,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     codigo = identifier;
                 }
-                fileContent += `${codigo};-;${barras};${product.quantity};-;-;-\n`;
+                fileContent += `${codigo};-;${barras};-;${product.quantity};-;-\n`;
+
+                // Acumula só quantidade
+                totalQuantidade += product.quantity;
             }
         });
+
+        //  Linha de totais no final (cada soma separada)
+        fileContent += `TOTAL;-;-;-;${totalQuantidade};${totalPreco.toFixed(2).replace('.', ',')};${totalGeral.toFixed(2).replace('.', ',')}\n`;
 
         // Gera e baixa o CSV
         const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
