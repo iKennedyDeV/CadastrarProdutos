@@ -19,10 +19,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw new Error('Erro ao carregar o arquivo JSON');
             }
             const jsonData = await response.json();
+
+            // Normalização dos campos
             produtosJSON = jsonData.map(item => ({
-                ...item,
-                "Código de Barras": String(item["Código de Barras"]).trim(),
-                "CÓDIGO": String(item["CÓDIGO"]).trim()
+                CODIGO: String(item["CODIGO"]).trim(),
+                COD_BARRAS: String(item["COD BARRAS"]).trim(),
+                DESCRICAO: item["DESCRICAO"] || "",
+                FABRICANTE: item["FABRICANTE"] || "",
+                MARCA: item["MARCA"] || "",
+                CUSTO_UNIT: item["CUSTO UNIT."] || "0",
+                PRECO: item["PRECO"] || "0"
             }));
         } catch (error) {
             console.error('Erro ao carregar os dados do JSON:', error);
@@ -72,67 +78,70 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Geração de CSV
-generateFileButton.addEventListener('click', function () {
-    try {
-        // Cabeçalho atualizado
-        let fileContent = 'Codigo;Descricao;Codigo de Barras;Marca;Quantidade;Preco;Qtd/Valor\n';
+    generateFileButton.addEventListener('click', function () {
+        try {
+            // Cabeçalho atualizado (agora com custo unit.)
+            let fileContent = 'Codigo;Descricao;Codigo de Barras;Marca;Quantidade;Custo Unit.;Preco;Qtd/Valor\n';
 
-        let totalQuantidade = 0;
-        let totalPreco = 0;
-        let totalGeral = 0;
+            let totalQuantidade = 0;
+            let totalCusto = 0;
+            let totalPreco = 0;
+            let totalGeral = 0;
 
-        products.forEach(product => {
-            const identifier = product.identifier.trim().toUpperCase();
+            products.forEach(product => {
+                const identifier = product.identifier.trim().toUpperCase();
 
-            const matchingProduct = produtosJSON.find(item =>
-                item["Código de Barras"].trim() === identifier ||
-                item["CÓDIGO"].trim().toUpperCase() === identifier
-            );
+                const matchingProduct = produtosJSON.find(item =>
+                    item.COD_BARRAS === identifier ||
+                    item.CODIGO.toUpperCase() === identifier
+                );
 
-            if (matchingProduct) {
-                const preco = parseFloat(matchingProduct["PREÇO"].toString().replace(',', '.')) || 0;
-                const total = preco * product.quantity;
+                if (matchingProduct) {
+                    const custoUnit = parseFloat(matchingProduct.CUSTO_UNIT.toString().replace(',', '.')) || 0;
+                    const preco = parseFloat(matchingProduct.PRECO.toString().replace(',', '.')) || 0;
+                    const total = preco * product.quantity;
 
-                //  Formata para padrão brasileiro
-                const precoFormatado = preco.toFixed(2).replace('.', ',');
-                const totalFormatado = total.toFixed(2).replace('.', ',');
+                    // Formatação brasileira
+                    const custoFormatado = custoUnit.toFixed(2).replace('.', ',');
+                    const precoFormatado = preco.toFixed(2).replace('.', ',');
+                    const totalFormatado = total.toFixed(2).replace('.', ',');
 
-                fileContent += `${matchingProduct["CÓDIGO"]};${matchingProduct["DESCRIÇÃO"]};${matchingProduct["Código de Barras"]};${matchingProduct["MARCA"]};${product.quantity};${precoFormatado};${totalFormatado}\n`;
+                    fileContent += `${matchingProduct.CODIGO};${matchingProduct.DESCRICAO};${matchingProduct.COD_BARRAS};${matchingProduct.MARCA};${product.quantity};${custoFormatado};${precoFormatado};${totalFormatado}\n`;
 
-                // Acumula totais
-                totalQuantidade += product.quantity;
-                totalPreco += preco;
-                totalGeral += total;
-            } else {
-                let codigo = '-';
-                let barras = '-';
-                const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
-                if (isCodigoBarras) {
-                    barras = identifier;
+                    // Acumula totais
+                    totalQuantidade += product.quantity;
+                    totalCusto += custoUnit;
+                    totalPreco += preco;
+                    totalGeral += total;
                 } else {
-                    codigo = identifier;
+                    let codigo = '-';
+                    let barras = '-';
+                    const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
+                    if (isCodigoBarras) {
+                        barras = identifier;
+                    } else {
+                        codigo = identifier;
+                    }
+                    fileContent += `${codigo};-;${barras};-;${product.quantity};-;-;-\n`;
+
+                    totalQuantidade += product.quantity;
                 }
-                fileContent += `${codigo};-;${barras};-;${product.quantity};-;-\n`;
+            });
 
-                // Acumula só quantidade
-                totalQuantidade += product.quantity;
-            }
-        });
+            // Linha de totais
+            fileContent += `TOTAL;-;-;-;${totalQuantidade};${totalCusto.toFixed(2).replace('.', ',')};${totalPreco.toFixed(2).replace('.', ',')};${totalGeral.toFixed(2).replace('.', ',')}\n`;
 
-        //  Linha de totais no final (cada soma separada)
-        fileContent += `TOTAL;-;-;-;${totalQuantidade};${totalPreco.toFixed(2).replace('.', ',')};${totalGeral.toFixed(2).replace('.', ',')}\n`;
-
-        // Gera e baixa o CSV
-        const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'produtos.csv';
-        link.click();
-    } catch (error) {
-        console.error('Erro ao gerar o arquivo CSV:', error);
-        alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
-    }
-});
+            // Gera e baixa o CSV
+            const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'produtos.csv';
+            link.click();
+        } catch (error) {
+            console.error('Erro ao gerar o arquivo CSV:', error);
+            alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
+        }
+    });
 
     // Limpa a tabela e o localStorage
     clearTableButton.addEventListener('click', function () {
