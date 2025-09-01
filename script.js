@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
     generateFileButton.addEventListener('click', function () {
         try {
             // Cabeçalho atualizado (agora com custo unit.)
-            let fileContent = 'Codigo;Descricao;Codigo de Barras;Marca;Quantidade;Custo Unit.;Preco;Qtd/Valor\n';
+            let fileContent = 'Codigo;Descricao;Codigo de Barras;Marca;Quantidade;P/Venda;Preco/Custo;Qtd/Custo\n';
 
             let totalQuantidade = 0;
             let totalCusto = 0;
@@ -99,14 +99,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (matchingProduct) {
                     const custoUnit = parseFloat(matchingProduct.CUSTO_UNIT.toString().replace(',', '.')) || 0;
                     const preco = parseFloat(matchingProduct.PRECO.toString().replace(',', '.')) || 0;
-                    const total = preco * product.quantity;
+                    const total = custoUnit * product.quantity;
 
                     // Formatação brasileira
                     const custoFormatado = custoUnit.toFixed(2).replace('.', ',');
                     const precoFormatado = preco.toFixed(2).replace('.', ',');
                     const totalFormatado = total.toFixed(2).replace('.', ',');
 
-                    fileContent += `${matchingProduct.CODIGO};${matchingProduct.DESCRICAO};${matchingProduct.COD_BARRAS};${matchingProduct.MARCA};${product.quantity};${custoFormatado};${precoFormatado};${totalFormatado}\n`;
+                    fileContent += `${matchingProduct.CODIGO};${matchingProduct.DESCRICAO};${matchingProduct.COD_BARRAS};${matchingProduct.MARCA};${product.quantity};${precoFormatado};${custoFormatado};${totalFormatado}\n`;
 
                     // Acumula totais
                     totalQuantidade += product.quantity;
