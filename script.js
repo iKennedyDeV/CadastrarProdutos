@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
     generateFileButton.addEventListener('click', function () {
         try {
             // Cabeçalho atualizado (agora com custo unit.)
-            let fileContent = 'Codigo;Descricao;Codigo de Barras;Marca;Quantidade;P/Venda;Preco/Custo;Qtd/Custo\n';
+            let fileContent = 'Codigo;Descricao;Codigo de Barras;Marca;Quantidade;Pç/Venda;Pç/Custo;QtdXCusto\n';
 
             let totalQuantidade = 0;
             let totalCusto = 0;
