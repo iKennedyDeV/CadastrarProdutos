@@ -1,12 +1,3 @@
-/* Tema escuro no body */
-body {
-    background-color: #121212;
-    color: #f0f0f0;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-}
-
 /* Container principal */
 .container {
     background-color: #1e1e1e;
@@ -15,14 +6,16 @@ body {
     width: 80%;
     max-width: 800px;
     margin: 0 auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
+    color: #f0f0f0;
 }
 
 /* Título */
-h1, h2 {
+h1 {
     text-align: center;
     color: #f0f0f0;
+    font-size: 2em;
+    margin-bottom: 20px;
 }
 
 /* Formulário */
@@ -35,22 +28,24 @@ form {
 form label {
     font-weight: bold;
     margin-bottom: 5px;
-    display: block;
-    color: #ddd;
+    color: #f0f0f0;
 }
 
 form input {
     width: 100%;
     padding: 10px;
     margin: 5px 0 15px;
-    border: 1px solid #555;
+    border: 1px solid #444;
     border-radius: 5px;
-    background-color: #2a2a2a;
+    background-color: #2c2c2c;
     color: #f0f0f0;
     box-sizing: border-box;
 }
 
-/* Botão padrão */
+form input::placeholder {
+    color: #aaa;
+}
+
 form button {
     background-color: #007bff;
     color: white;
@@ -61,37 +56,76 @@ form button {
     font-size: 16px;
     transition: background-color 0.3s;
 }
+
 form button:hover {
     background-color: #0056b3;
 }
 
-/* Linha de botões extras */
+/* Botões Remover / Limpar lado a lado */
 .button-row {
     display: flex;
-    gap: 12px; /* espaçamento entre botões */
-    justify-content: center;
-    margin-top: 10px;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-/* Botões extras */
+.cuidado {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #fff;
+    transition: background-color 0.3s;
+}
+
 #removeLast {
     background-color: #ffc107;
-    color: black;
 }
+
 #removeLast:hover {
     background-color: #e0a800;
 }
 
 #clearTable {
     background-color: #f44336;
-    color: white;
 }
+
 #clearTable:hover {
     background-color: #d32f2f;
 }
 
-/* Botão gerar arquivo */
-#generateFile {
+/* Tabela */
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    overflow-x: auto;
+    display: block;
+}
+
+table th, table td {
+    text-align: left;
+    padding: 12px 15px;
+    border-bottom: 1px solid #444;
+    color: #f0f0f0;
+}
+
+table th {
+    background-color: #333;
+    color: #fff;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #2a2a2a;
+}
+
+table tbody tr:hover {
+    background-color: #3a3a3a;
+}
+
+/* Botão Gerar Arquivo */
+button#generateFile {
     background-color: #28a745;
     color: white;
     padding: 10px 15px;
@@ -104,39 +138,9 @@ form button:hover {
     width: 100%;
     transition: background-color 0.3s;
 }
-#generateFile:hover {
+
+button#generateFile:hover {
     background-color: #218838;
-}
-
-/* Tabela */
-table {
-    width: 100%;
-    margin-top: 20px;
-    border-collapse: collapse;
-    background-color: #2c2c2c;
-    color: #f0f0f0;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
-    overflow-x: auto;
-    display: block;
-}
-
-table th, table td {
-    text-align: left;
-    padding: 12px 15px;
-    border-bottom: 1px solid #444; /* apenas divisórias internas */
-}
-
-table th {
-    background-color: #00bcd4;
-    color: white;
-    border-bottom: 2px solid #0097a7;
-}
-
-table tbody tr:nth-child(even) {
-    background-color: #1e1e1e;
-}
-table tbody tr:hover {
-    background-color: #333;
 }
 
 /* Modal */
@@ -149,84 +153,53 @@ table tbody tr:hover {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0,0,0,0.5);
     padding-top: 60px;
 }
 
 .modal-content {
     background-color: #2c2c2c;
-    color: #f0f0f0;
     margin: 5% auto;
     padding: 20px;
     border-radius: 8px;
     width: 90%;
     max-width: 400px;
     text-align: center;
+    color: #f0f0f0;
 }
 
-button {
-    padding: 10px 20px;
-    margin: 10px;
-    cursor: pointer;
-    border: none;
-    border-radius: 5px;
-}
-
-/* Botões do modal */
 #confirmClearTable {
-    background-color: #4CAF50;
+    background-color: #4caf50;
     color: white;
-}
-#confirmClearTable:hover {
-    background-color: #3a9c42;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
 }
 
 #cancelClearTable {
     background-color: #f44336;
     color: white;
-}
-#cancelClearTable:hover {
-    background-color: #d32f2f;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
 }
 
 /* Responsividade */
 @media (max-width: 1024px) {
-    .container {
-        width: 90%;
-    }
-    form input, form button, button#generateFile {
-        font-size: 15px;
-    }
-    table th, table td {
-        padding: 10px;
-    }
+    .container { width: 90%; }
+    form input, form button, button#generateFile { font-size: 15px; }
+    table th, table td { padding: 10px; }
 }
 
 @media (max-width: 768px) {
-    .container {
-        width: 95%;
-        padding: 15px;
-    }
-    h1 {
-        font-size: 1.8em;
-    }
-    form input, form button, button#generateFile {
-        font-size: 14px;
-    }
-    table th, table td {
-        padding: 8px;
-    }
+    .container { width: 95%; padding: 15px; }
+    h1 { font-size: 1.8em; }
+    form input, form button, button#generateFile { font-size: 14px; }
+    table th, table td { padding: 8px; }
 }
 
 @media (max-width: 480px) {
-    h1 {
-        font-size: 1.5em;
-    }
-    form input, form button, button#generateFile {
-        font-size: 13px;
-        padding: 8px;
-    }
-    table {
-        font-size: 12px;
-    }
+    h1 { font-size: 1.5em; }
+    form input, form button, button#generateFile { font-size: 13px; padding: 8px; }
+    table { font-size: 12px; }
 }
