@@ -1,21 +1,28 @@
+/* Tema escuro no body */
+body {
+    background-color: #121212;
+    color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
 /* Container principal */
 .container {
-    background-color: #ffffff;
+    background-color: #1e1e1e;
     padding: 20px;
     border-radius: 8px;
     width: 80%;
     max-width: 800px;
-    margin: 0 auto; /* centraliza no desktop */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
 }
 
 /* Título */
-h1 {
+h1, h2 {
     text-align: center;
-    color: #333;
-    font-size: 2em;
-    margin-bottom: 20px;
+    color: #f0f0f0;
 }
 
 /* Formulário */
@@ -25,36 +32,25 @@ form {
     flex-direction: column;
 }
 
-.cuidado {
-    color: white;
-    background-color: #f53;
-    border-radius: 5px;
-    padding: 5px 10px;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
 form label {
     font-weight: bold;
     margin-bottom: 5px;
     display: block;
-    color: #333;
+    color: #ddd;
 }
 
 form input {
     width: 100%;
     padding: 10px;
     margin: 5px 0 15px;
-    border: 1px solid #ccc;
+    border: 1px solid #555;
     border-radius: 5px;
+    background-color: #2a2a2a;
+    color: #f0f0f0;
     box-sizing: border-box;
 }
 
-form input[type="checkbox"] {
-    width: auto;
-    margin-right: 10px;
-}
-
+/* Botão padrão */
 form button {
     background-color: #007bff;
     color: white;
@@ -65,51 +61,37 @@ form button {
     font-size: 16px;
     transition: background-color 0.3s;
 }
-
 form button:hover {
     background-color: #0056b3;
 }
 
-form button#removeLast {
-    background-color: #ffc107;
+/* Linha de botões extras */
+.button-row {
+    display: flex;
+    gap: 12px; /* espaçamento entre botões */
+    justify-content: center;
     margin-top: 10px;
 }
 
-form button#removeLast:hover {
+/* Botões extras */
+#removeLast {
+    background-color: #ffc107;
+    color: black;
+}
+#removeLast:hover {
     background-color: #e0a800;
 }
 
-/* Tabela */
-table {
-    width: 100%;
-    margin-top: 20px;
-    border-collapse: collapse;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow-x: auto;
-    display: block;
-}
-
-table th, table td {
-    text-align: left;
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-}
-
-table th {
-    background-color: #007bff;
+#clearTable {
+    background-color: #f44336;
     color: white;
 }
-
-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
+#clearTable:hover {
+    background-color: #d32f2f;
 }
 
-table tbody tr:hover {
-    background-color: #f1f1f1;
-}
-
-/* Botões extras */
-button#generateFile {
+/* Botão gerar arquivo */
+#generateFile {
     background-color: #28a745;
     color: white;
     padding: 10px 15px;
@@ -122,23 +104,39 @@ button#generateFile {
     width: 100%;
     transition: background-color 0.3s;
 }
-
-button#generateFile:hover {
+#generateFile:hover {
     background-color: #218838;
 }
 
-#limpar {
-    background-color: red;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 15px;
-    display: block;
+/* Tabela */
+table {
     width: 100%;
-    transition: background-color 0.3s;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background-color: #2c2c2c;
+    color: #f0f0f0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+    overflow-x: auto;
+    display: block;
+}
+
+table th, table td {
+    text-align: left;
+    padding: 12px 15px;
+    border-bottom: 1px solid #444; /* apenas divisórias internas */
+}
+
+table th {
+    background-color: #00bcd4;
+    color: white;
+    border-bottom: 2px solid #0097a7;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #1e1e1e;
+}
+table tbody tr:hover {
+    background-color: #333;
 }
 
 /* Modal */
@@ -151,12 +149,13 @@ button#generateFile:hover {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
     padding-top: 60px;
 }
 
 .modal-content {
-    background-color: #fff;
+    background-color: #2c2c2c;
+    color: #f0f0f0;
     margin: 5% auto;
     padding: 20px;
     border-radius: 8px;
@@ -169,22 +168,25 @@ button {
     padding: 10px 20px;
     margin: 10px;
     cursor: pointer;
+    border: none;
+    border-radius: 5px;
 }
 
-button:hover {
-    background-color: #ddd;
-}
-
+/* Botões do modal */
 #confirmClearTable {
     background-color: #4CAF50;
     color: white;
-    border: none;
+}
+#confirmClearTable:hover {
+    background-color: #3a9c42;
 }
 
 #cancelClearTable {
     background-color: #f44336;
     color: white;
-    border: none;
+}
+#cancelClearTable:hover {
+    background-color: #d32f2f;
 }
 
 /* Responsividade */
@@ -192,11 +194,9 @@ button:hover {
     .container {
         width: 90%;
     }
-
     form input, form button, button#generateFile {
         font-size: 15px;
     }
-
     table th, table td {
         padding: 10px;
     }
@@ -207,15 +207,12 @@ button:hover {
         width: 95%;
         padding: 15px;
     }
-
     h1 {
         font-size: 1.8em;
     }
-
     form input, form button, button#generateFile {
         font-size: 14px;
     }
-
     table th, table td {
         padding: 8px;
     }
@@ -225,12 +222,10 @@ button:hover {
     h1 {
         font-size: 1.5em;
     }
-
     form input, form button, button#generateFile {
         font-size: 13px;
         padding: 8px;
     }
-
     table {
         font-size: 12px;
     }
