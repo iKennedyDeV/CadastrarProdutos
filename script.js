@@ -7,38 +7,43 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmationModal = document.getElementById('confirmationModal');
     const confirmClearButton = document.getElementById('confirmClearTable');
     const cancelClearButton = document.getElementById('cancelClearTable');
+    const modeSelect = document.getElementById('mode');
+    const quantitySection = document.getElementById('quantitySection');
 
     let products = JSON.parse(localStorage.getItem('products')) || [];
     let produtosJSON = [];
 
-    // Função para carregar o arquivo JSON e normalizar os dados
+    // Exibir ou ocultar campo de quantidade conforme o modo
+    modeSelect.addEventListener('change', function () {
+        if (modeSelect.value === 'incremento') {
+            quantitySection.style.display = 'none';
+        } else {
+            quantitySection.style.display = 'block';
+        }
+    });
+
+    // Carrega produtos.json
     async function loadProdutos() {
         try {
             const response = await fetch('produtos.json');
-            if (!response.ok) {
-                throw new Error('Erro ao carregar o arquivo JSON');
-            }
+            if (!response.ok) throw new Error('Erro ao carregar o arquivo JSON');
             const jsonData = await response.json();
 
-            // Normalização dos campos
             produtosJSON = jsonData.map(item => ({
                 CODIGO: String(item["CODIGO"]).trim(),
                 COD_BARRAS: String(item["COD BARRAS"]).trim(),
                 DESCRICAO: item["DESCRICAO"] || "",
                 FABRICANTE: item["FABRICANTE"] || "",
                 MARCA: item["MARCA"] || "",
-                CUSTO_UNIT: item["CUSTO UNIT."] || "0",
-                PRECO: item["PRECO"] || "0"
+                CUSTO_UNIT: item["CUSTO UNIT."] || "0"
             }));
         } catch (error) {
             console.error('Erro ao carregar os dados do JSON:', error);
         }
     }
 
-    // Chama a função de carregamento do JSON
     loadProdutos();
 
-    // Atualiza a tabela com os dados armazenados
     function updateTable() {
         tableBody.innerHTML = '';
         products.forEach((product, index) => {
@@ -49,22 +54,28 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Atualiza a tabela na inicialização
     updateTable();
 
-    // Adiciona ou atualiza um produto na lista
+    // Adicionar produto
     form.addEventListener('submit', function (event) {
         event.preventDefault();
 
         const identifier = String(document.getElementById('identifier').value).trim();
-        const quantity = parseInt(document.getElementById('quantity').value, 10) || 0;
+        const mode = modeSelect.value;
+        let quantity = 0;
 
-        if (quantity < 0) {
-            alert('Quantidade inválida!');
-            return;
+        if (mode === 'manual') {
+            quantity = parseInt(document.getElementById('quantity').value, 10) || 0;
+            if (quantity < 0) {
+                alert('Quantidade inválida!');
+                return;
+            }
+        } else {
+            // Incremento automático (+1)
+            quantity = 1;
         }
 
-        const existingProduct = products.find(product => product.identifier === identifier);
+        const existingProduct = products.find(p => p.identifier === identifier);
         if (existingProduct) {
             existingProduct.quantity += quantity;
         } else {
@@ -77,61 +88,47 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('identifier').focus();
     });
 
-    // Geração de CSV
+    // Gerar CSV (sem preço de venda)
     generateFileButton.addEventListener('click', function () {
         try {
-            // Cabeçalho atualizado (agora com custo unit.)
-            let fileContent = 'Codigo;Descricao;Codigo de Barras;Marca;Quantidade;Pç/Venda;Pç/Custo;QtdXCusto\n';
+            let fileContent = 'Codigo;Descricao;Codigo de Barras;Marca;Quantidade;Pç/Custo;QtdXCusto\n';
 
             let totalQuantidade = 0;
             let totalCusto = 0;
-            let totalPreco = 0;
             let totalGeral = 0;
 
             products.forEach(product => {
                 const identifier = product.identifier.trim().toUpperCase();
-
-                const matchingProduct = produtosJSON.find(item =>
+                const match = produtosJSON.find(item =>
                     item.COD_BARRAS === identifier ||
                     item.CODIGO.toUpperCase() === identifier
                 );
 
-                if (matchingProduct) {
-                    const custoUnit = parseFloat(matchingProduct.CUSTO_UNIT.toString().replace(',', '.')) || 0;
-                    const preco = parseFloat(matchingProduct.PRECO.toString().replace(',', '.')) || 0;
+                if (match) {
+                    const custoUnit = parseFloat(match.CUSTO_UNIT.toString().replace(',', '.')) || 0;
                     const total = custoUnit * product.quantity;
 
-                    // Formatação brasileira
                     const custoFormatado = custoUnit.toFixed(2).replace('.', ',');
-                    const precoFormatado = preco.toFixed(2).replace('.', ',');
                     const totalFormatado = total.toFixed(2).replace('.', ',');
 
-                    fileContent += `${matchingProduct.CODIGO};${matchingProduct.DESCRICAO};${matchingProduct.COD_BARRAS};${matchingProduct.MARCA};${product.quantity};${precoFormatado};${custoFormatado};${totalFormatado}\n`;
+                    fileContent += `${match.CODIGO};${match.DESCRICAO};${match.COD_BARRAS};${match.MARCA};${product.quantity};${custoFormatado};${totalFormatado}\n`;
 
-                    // Acumula totais
                     totalQuantidade += product.quantity;
                     totalCusto += custoUnit;
-                    totalPreco += preco;
                     totalGeral += total;
                 } else {
                     let codigo = '-';
                     let barras = '-';
                     const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
-                    if (isCodigoBarras) {
-                        barras = identifier;
-                    } else {
-                        codigo = identifier;
-                    }
-                    fileContent += `${codigo};-;${barras};-;${product.quantity};-;-;-\n`;
+                    if (isCodigoBarras) barras = identifier; else codigo = identifier;
 
+                    fileContent += `${codigo};-;${barras};-;${product.quantity};-;-\n`;
                     totalQuantidade += product.quantity;
                 }
             });
 
-            // Linha de totais
-            fileContent += `TOTAL;-;-;-;${totalQuantidade};${totalPreco.toFixed(2).replace('.', ',')};${totalCusto.toFixed(2).replace('.', ',')};${totalGeral.toFixed(2).replace('.', ',')}\n`;
+            fileContent += `TOTAL;-;-;-;${totalQuantidade};${totalCusto.toFixed(2).replace('.', ',')};${totalGeral.toFixed(2).replace('.', ',')}\n`;
 
-            // Gera e baixa o CSV
             const blob = new Blob([fileContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -139,27 +136,21 @@ document.addEventListener('DOMContentLoaded', function () {
             link.click();
         } catch (error) {
             console.error('Erro ao gerar o arquivo CSV:', error);
-            alert('Ocorreu um erro ao gerar o arquivo CSV. Verifique o console para mais informações.');
+            alert('Erro ao gerar o arquivo CSV.');
         }
     });
 
-    // Limpa a tabela e o localStorage
-    clearTableButton.addEventListener('click', function () {
-        confirmationModal.style.display = 'block';
-    });
-
-    cancelClearButton.addEventListener('click', function () {
-        confirmationModal.style.display = 'none';
-    });
-
-    confirmClearButton.addEventListener('click', function () {
+    // Modal de confirmação
+    clearTableButton.addEventListener('click', () => confirmationModal.style.display = 'block');
+    cancelClearButton.addEventListener('click', () => confirmationModal.style.display = 'none');
+    confirmClearButton.addEventListener('click', () => {
         products = [];
         localStorage.removeItem('products');
         updateTable();
         confirmationModal.style.display = 'none';
     });
 
-    // Remove o último produto da lista
+    // Remover último item
     removeLastButton.addEventListener('click', function () {
         if (products.length > 0) {
             products.pop();
@@ -168,16 +159,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Permite editar um produto ao clicar na tabela
+    // Editar item ao clicar
     tableBody.addEventListener('click', function (event) {
         const row = event.target.closest('tr');
         if (row) {
             const index = row.dataset.index;
             const product = products[index];
-
             document.getElementById('identifier').value = product.identifier;
             document.getElementById('quantity').value = product.quantity;
-
             products.splice(index, 1);
             localStorage.setItem('products', JSON.stringify(products));
             updateTable();
