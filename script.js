@@ -9,9 +9,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const cancelClearButton = document.getElementById('cancelClearTable');
     const modeSelect = document.getElementById('mode');
     const quantitySection = document.getElementById('quantitySection');
+    const identifierInput = document.getElementById('identifier');
 
     let products = JSON.parse(localStorage.getItem('products')) || [];
     let produtosJSON = [];
+
+    // Mantém foco sempre no campo de código
+    function focusIdentifier() {
+        setTimeout(() => identifierInput.focus(), 50);
+    }
 
     // Exibir ou ocultar campo de quantidade conforme o modo
     modeSelect.addEventListener('change', function () {
@@ -20,9 +26,9 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             quantitySection.style.display = 'block';
         }
+        focusIdentifier();
     });
 
-    // Carrega produtos.json
     async function loadProdutos() {
         try {
             const response = await fetch('produtos.json');
@@ -56,23 +62,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     updateTable();
 
-    // Adicionar produto
     form.addEventListener('submit', function (event) {
         event.preventDefault();
 
-        const identifier = String(document.getElementById('identifier').value).trim();
+        const identifier = String(identifierInput.value).trim();
         const mode = modeSelect.value;
-        let quantity = 0;
+        let quantity = mode === 'manual'
+            ? parseInt(document.getElementById('quantity').value, 10) || 0
+            : 1;
 
-        if (mode === 'manual') {
-            quantity = parseInt(document.getElementById('quantity').value, 10) || 0;
-            if (quantity < 0) {
-                alert('Quantidade inválida!');
-                return;
-            }
-        } else {
-            // Incremento automático (+1)
-            quantity = 1;
+        if (quantity < 0) {
+            alert('Quantidade inválida!');
+            return;
         }
 
         const existingProduct = products.find(p => p.identifier === identifier);
@@ -85,29 +86,29 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem('products', JSON.stringify(products));
         updateTable();
         form.reset();
-        document.getElementById('identifier').focus();
+        focusIdentifier();
     });
 
-    // Gerar CSV (sem preço de venda)
+    // Mantém foco mesmo ao gerar arquivo ou limpar tabela
+    [generateFileButton, clearTableButton, removeLastButton].forEach(btn =>
+        btn.addEventListener('click', focusIdentifier)
+    );
+
+    // CSV SEM preço de venda
     generateFileButton.addEventListener('click', function () {
         try {
             let fileContent = 'Codigo;Descricao;Codigo de Barras;Marca;Quantidade;Pç/Custo;QtdXCusto\n';
-
-            let totalQuantidade = 0;
-            let totalCusto = 0;
-            let totalGeral = 0;
+            let totalQuantidade = 0, totalCusto = 0, totalGeral = 0;
 
             products.forEach(product => {
                 const identifier = product.identifier.trim().toUpperCase();
                 const match = produtosJSON.find(item =>
-                    item.COD_BARRAS === identifier ||
-                    item.CODIGO.toUpperCase() === identifier
+                    item.COD_BARRAS === identifier || item.CODIGO.toUpperCase() === identifier
                 );
 
                 if (match) {
                     const custoUnit = parseFloat(match.CUSTO_UNIT.toString().replace(',', '.')) || 0;
                     const total = custoUnit * product.quantity;
-
                     const custoFormatado = custoUnit.toFixed(2).replace('.', ',');
                     const totalFormatado = total.toFixed(2).replace('.', ',');
 
@@ -117,8 +118,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     totalCusto += custoUnit;
                     totalGeral += total;
                 } else {
-                    let codigo = '-';
-                    let barras = '-';
+                    let codigo = '-', barras = '-';
                     const isCodigoBarras = identifier.length >= 8 && /^\d+$/.test(identifier);
                     if (isCodigoBarras) barras = identifier; else codigo = identifier;
 
@@ -134,42 +134,50 @@ document.addEventListener('DOMContentLoaded', function () {
             link.href = URL.createObjectURL(blob);
             link.download = 'produtos.csv';
             link.click();
+
+            focusIdentifier();
         } catch (error) {
             console.error('Erro ao gerar o arquivo CSV:', error);
             alert('Erro ao gerar o arquivo CSV.');
         }
     });
 
-    // Modal de confirmação
     clearTableButton.addEventListener('click', () => confirmationModal.style.display = 'block');
-    cancelClearButton.addEventListener('click', () => confirmationModal.style.display = 'none');
+    cancelClearButton.addEventListener('click', () => {
+        confirmationModal.style.display = 'none';
+        focusIdentifier();
+    });
     confirmClearButton.addEventListener('click', () => {
         products = [];
         localStorage.removeItem('products');
         updateTable();
         confirmationModal.style.display = 'none';
+        focusIdentifier();
     });
 
-    // Remover último item
     removeLastButton.addEventListener('click', function () {
         if (products.length > 0) {
             products.pop();
             localStorage.setItem('products', JSON.stringify(products));
             updateTable();
         }
+        focusIdentifier();
     });
 
-    // Editar item ao clicar
     tableBody.addEventListener('click', function (event) {
         const row = event.target.closest('tr');
         if (row) {
             const index = row.dataset.index;
             const product = products[index];
-            document.getElementById('identifier').value = product.identifier;
+            identifierInput.value = product.identifier;
             document.getElementById('quantity').value = product.quantity;
             products.splice(index, 1);
             localStorage.setItem('products', JSON.stringify(products));
             updateTable();
+            focusIdentifier();
         }
     });
+
+    // Foco inicial
+    focusIdentifier();
 });
