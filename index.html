@@ -6,21 +6,25 @@
     <title>Produtos</title>
     <link rel="icon" type="image/png" href="assets/c.png">
     <link rel="stylesheet" href="style.css" />
+   
 </head>
 <body>
     <div class="container">
         <h1>Cadastrar Produtos</h1>
-        
+
+        <!-- Modo de entrada fora do formulário -->
+        <div id="modeContainer">
+            <label for="mode"><strong>Modo de entrada:</strong></label>
+            <select id="mode" name="mode">
+                <option value="manual" selected>Quantidade manual</option>
+                <option value="incremento">Incremento automático (+1)</option>
+            </select>
+        </div>
+
         <form id="productForm">
             <label for="identifier">Código ou Código de Barras:</label>
             <input type="number" id="identifier" name="identifier" required placeholder="Digite o código"><br><br>
             
-            <label for="mode">Modo de entrada:</label>
-            <select id="mode" name="mode">
-                <option value="manual" selected>Quantidade manual</option>
-                <option value="incremento">Incremento automático (+1)</option>
-            </select><br><br>
-
             <div id="quantitySection">
                 <label for="quantity">Quantidade:</label>
                 <input type="number" id="quantity" name="quantity" required placeholder="Digite a quantidade"><br><br>
