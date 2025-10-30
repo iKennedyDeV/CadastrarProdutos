@@ -213,6 +213,23 @@ p {
     color: #888;
 }
 
+        /* Evita que o modo de entrada atrapalhe o foco */
+        #modeContainer {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #mode {
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        /* Garante que o campo de código fique sempre visível e focável */
+        #identifier:focus {
+            outline: 2px solid #009879;
+        }
+
+
 /* ====== RESPONSIVIDADE ====== */
 @media (max-width: 1024px) {
     .container {
