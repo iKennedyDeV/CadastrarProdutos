@@ -111,7 +111,6 @@ table {
     border-collapse: collapse;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
     overflow-x: auto;
-    display: block;
     background-color: #2c2c2c;
     color: #f0f0f0;
     border: none; /* sem borda branca */
